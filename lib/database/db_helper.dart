@@ -1,41 +1,77 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
+
   static Database? _database;
 
   Future<Database> get database async {
-    if (_database != null) return _database!;
+
+    if (_database != null) {
+      return _database!;
+    }
+
     _database = await initDB();
+
     return _database!;
   }
 
-  initDB() async {
-    String path = join(await getDatabasesPath(), 'run.db');
+  Future<Database> initDB() async {
+
+    String path = join(
+      await getDatabasesPath(),
+      'catat_lari.db',
+    );
 
     return await openDatabase(
+
       path,
-      version: 1,
+
+      version: 2,
+
       onCreate: (db, version) async {
-        // USER TABLE
+
         await db.execute('''
           CREATE TABLE users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT,
-            password TEXT,
-            name TEXT
+            email TEXT,
+            password TEXT
           )
         ''');
 
-        // RUN TABLE (RELASI)
         await db.execute('''
           CREATE TABLE runs(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             userId INTEGER,
-            distance REAL,
-            duration INTEGER,
-            date TEXT,
-            FOREIGN KEY (userId) REFERENCES users(id)
+            distance TEXT,
+            duration TEXT,
+            date TEXT
+          )
+        ''');
+      },
+
+      onUpgrade: (db, oldVersion, newVersion) async {
+
+        await db.execute('DROP TABLE IF EXISTS users');
+        await db.execute('DROP TABLE IF EXISTS runs');
+
+        await db.execute('''
+          CREATE TABLE users(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            email TEXT,
+            password TEXT
+          )
+        ''');
+
+        await db.execute('''
+          CREATE TABLE runs(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            userId INTEGER,
+            distance TEXT,
+            duration TEXT,
+            date TEXT
           )
         ''');
       },

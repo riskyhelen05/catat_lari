@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../database/auth_service.dart';
-import '../../database/session.dart';
+
+import '../home/home_screen.dart';
+
+import '../../data/user_data.dart';
+
+import '../../database/db_helper.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -8,51 +12,166 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final AuthService authService = AuthService();
 
-  TextEditingController username = TextEditingController();
-  TextEditingController password = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool isHidden = true;
 
   void doLogin() async {
-    var user = await authService.login(
-      username.text,
-      password.text,
+
+  String emailText = emailController.text.trim();
+  String passwordText = passwordController.text.trim();
+
+  if (emailText.isEmpty) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Email wajib diisi"),
+      ),
     );
 
-    if (user != null) {
-      Session.setUser(user);
-
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login gagal!")),
-      );
-    }
+    return;
   }
+
+  if (passwordText.isEmpty) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Password wajib diisi"),
+      ),
+    );
+
+    return;
+  }
+
+  final db = await DBHelper().database;
+
+  final result = await db.query(
+    'users',
+
+    where: 'email = ? AND password = ?',
+
+    whereArgs: [
+      emailText,
+      passwordText,
+    ],
+  );
+
+  if (result.isEmpty) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Email atau password salah"),
+      ),
+    );
+
+    return;
+  }
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text("Login berhasil"),
+    ),
+  );
+
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => HomeScreen(),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      appBar: AppBar(title: Text("Login")),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: username,
-              decoration: InputDecoration(labelText: "Username"),
-            ),
-            TextField(
-              controller: password,
-              obscureText: true,
-              decoration: InputDecoration(labelText: "Password"),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: doLogin,
-              child: Text("Login"),
-            )
-          ],
+
+      appBar: AppBar(
+        title: Text("Login"),
+      ),
+
+      body: SingleChildScrollView(
+
+        child: Padding(
+          padding: EdgeInsets.all(24),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+
+            children: [
+
+              SizedBox(height: 40),
+
+              Text(
+                "Selamat Datang 👋",
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              SizedBox(height: 10),
+
+              Text(
+                "Silakan login ke akunmu",
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+
+              SizedBox(height: 40),
+
+              TextField(
+                controller: emailController,
+
+                decoration: InputDecoration(
+                  labelText: "Email",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              TextField(
+                controller: passwordController,
+                obscureText: isHidden,
+
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(),
+
+                  suffixIcon: IconButton(
+                    onPressed: () {
+
+                      setState(() {
+                        isHidden = !isHidden;
+                      });
+                    },
+
+                    icon: Icon(
+                      isHidden
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+
+                child: ElevatedButton(
+                  onPressed: doLogin,
+
+                  child: Text("Login"),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

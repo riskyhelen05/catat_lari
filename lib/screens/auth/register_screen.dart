@@ -1,40 +1,209 @@
 import 'package:flutter/material.dart';
-import '../../database/auth_service.dart';
+import '../home/home_screen.dart';
+import '../../database/db_helper.dart';
+import '../../models/user.dart';
 
-class RegisterScreen extends StatelessWidget {
-  final AuthService authService = AuthService();
+class RegisterScreen extends StatefulWidget {
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
 
+class _RegisterScreenState extends State<RegisterScreen> {
+
+  final nama = TextEditingController();
   final username = TextEditingController();
+  final email = TextEditingController();
   final password = TextEditingController();
-  final name = TextEditingController();
+  final confirmPassword = TextEditingController();
 
-  void register(BuildContext context) async {
-    await authService.register(
-      username.text,
-      password.text,
-      name.text,
+  bool isPasswordHidden = true;
+  bool isConfirmHidden = true;
+
+  void doRegister() async {
+
+  String usernameText = username.text.trim();
+  String emailText = email.text.trim();
+  String passwordText = password.text.trim();
+  String confirmText = confirmPassword.text.trim();
+
+  if (
+  usernameText.isEmpty ||
+      emailText.isEmpty ||
+      passwordText.isEmpty ||
+      confirmText.isEmpty
+  ) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Semua field wajib diisi"),
+      ),
     );
 
-    Navigator.pop(context);
+    return;
   }
+
+  if (!emailText.contains("@")) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Email tidak valid"),
+      ),
+    );
+
+    return;
+  }
+
+  if (passwordText.length < 6) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Password minimal 6 karakter"),
+      ),
+    );
+
+    return;
+  }
+
+  if (passwordText != confirmText) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Konfirmasi password tidak sama"),
+      ),
+    );
+
+    return;
+  }
+
+  final db = await DBHelper().database;
+
+  User user = User(
+    username: usernameText,
+    email: emailText,
+    password: passwordText,
+  );
+
+  await db.insert(
+    'users',
+    user.toMap(),
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text("Register berhasil"),
+    ),
+  );
+
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => HomeScreen(),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      appBar: AppBar(title: Text("Register")),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(controller: name, decoration: InputDecoration(labelText: "Name")),
-            TextField(controller: username, decoration: InputDecoration(labelText: "Username")),
-            TextField(controller: password, decoration: InputDecoration(labelText: "Password")),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => register(context),
-              child: Text("Register"),
-            )
-          ],
+
+      appBar: AppBar(
+        title: Text("Daftar"),
+      ),
+
+      body: SingleChildScrollView(
+
+        child: Padding(
+          padding: EdgeInsets.all(24),
+
+          child: Column(
+            children: [
+
+              SizedBox(height: 20),
+
+              TextField(
+                controller: username,
+                decoration: InputDecoration(
+                  labelText: "Username",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              TextField(
+                controller: email,
+                decoration: InputDecoration(
+                  labelText: "Email",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              TextField(
+                controller: password,
+                obscureText: isPasswordHidden,
+
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(),
+
+                  suffixIcon: IconButton(
+                    onPressed: () {
+
+                      setState(() {
+                      isPasswordHidden = !isPasswordHidden;
+                      });
+                    },
+
+                    icon: Icon(
+                      isPasswordHidden
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              TextField(
+                controller: confirmPassword,
+                obscureText: isConfirmHidden,
+
+                decoration: InputDecoration(
+                  labelText: "Konfirmasi Password",
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+
+                      setState(() {
+                      isConfirmHidden = !isConfirmHidden;
+                      });
+                    },
+
+                    icon: Icon(
+                      isConfirmHidden
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+
+                child: ElevatedButton(
+                onPressed: doRegister,
+                child: Text("Daftar"),
+                )
+                ),
+            ],
+          ),
         ),
       ),
     );
