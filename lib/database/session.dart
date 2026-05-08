@@ -1,18 +1,18 @@
 class Session {
   static int? userId;
   static String? username;
-  static String? name;
+  static String? email;
 
   static void setUser(Map<String, dynamic> user) {
     userId = user['id'];
     username = user['username'];
-    name = user['name'];
+    email = user['email']; // ✅ FIX
   }
 
   static void clear() {
     userId = null;
     username = null;
-    name = null;
+    email = null; // ✅ FIX
   }
 
   static bool isLoggedIn() {

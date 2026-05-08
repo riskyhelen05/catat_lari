@@ -6,6 +6,9 @@ import '../../data/user_data.dart';
 
 import '../../database/db_helper.dart';
 
+import '../../database/session.dart';
+
+
 class LoginScreen extends StatefulWidget {
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -68,6 +71,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return;
   }
+
+  final user = result.first;
+
+// simpan ke session
+Session.setUser(user);
+
+print("User login: ${Session.userId}");
+
+ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+    content: Text("Login berhasil"),
+  ),
+);
+
+Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (context) => HomeScreen(),
+  ),
+);
 
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
