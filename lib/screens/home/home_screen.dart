@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import '../../database/db_helper.dart';
 import '../../database/session.dart';
 import '../run/add_run_screen.dart';
-import '../run/edit_run_screen.dart';
 import '../run/detail_run_screen.dart';
-import '../profile/profile_screen.dart';
-import '../statistic/statistic_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -57,50 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
 
       appBar: AppBar(
-
-  title: Text("Catat Lari"),
-
-  actions: [
-
-    // 🔥 STATISTIK
-    IconButton(
-
-      icon: Icon(Icons.bar_chart),
-
-      onPressed: () {
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => StatisticScreen(),
-          ),
-        );
-      },
-    ),
-
-    // 🔥 PROFILE
-    IconButton(
-
-      icon: Icon(Icons.person),
-
-      onPressed: () {
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProfileScreen(),
-          ),
-        );
-      },
-    ),
-
-    // 🔥 LOGOUT
-    IconButton(
-      icon: Icon(Icons.logout),
-      onPressed: () => logout(context),
-    ),
-  ],
-),
+      title: Text("Catat Lari"),
+      centerTitle: true,
+      ),
 
       body: FutureBuilder<Map<String, dynamic>>(
 
