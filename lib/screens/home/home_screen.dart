@@ -57,38 +57,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
       appBar: AppBar(
 
-        title: Text("Catat Lari"),
+  title: Text("Catat Lari"),
 
-        actions: [
+  actions: [
 
-  IconButton(
+    IconButton(
 
-    icon: Icon(Icons.person),
+      icon: Icon(Icons.person),
 
-    onPressed: () {
+      onPressed: () {
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ProfileScreen(),
-        ),
-      );
-    },
-  ),
-
-  IconButton(
-    icon: Icon(Icons.logout),
-    onPressed: () => logout(context),
-  ),
-],
-
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () => logout(context),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProfileScreen(),
           ),
+        );
+      },
+    ),
 
-        ],
-      ),
+    IconButton(
+      icon: Icon(Icons.logout),
+      onPressed: () => logout(context),
+    ),
+  ],
+),
 
       body: FutureBuilder<Map<String, dynamic>>(
 
