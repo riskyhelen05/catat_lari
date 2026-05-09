@@ -3,61 +3,75 @@ import '../../database/db_helper.dart';
 import '../../database/session.dart';
 
 class AddRunScreen extends StatefulWidget {
+
+  const AddRunScreen({super.key});
+
   @override
-  State<AddRunScreen> createState() => _AddRunScreenState();
+  State<AddRunScreen> createState() =>
+      _AddRunScreenState();
 }
 
-class _AddRunScreenState extends State<AddRunScreen> {
+class _AddRunScreenState
+    extends State<AddRunScreen> {
+
   final _formKey = GlobalKey<FormState>();
 
-  final distanceController = TextEditingController();
-  final noteController = TextEditingController();
+  final distanceController =
+      TextEditingController();
+
+  final durationController =
+      TextEditingController();
+
+  final noteController =
+      TextEditingController();
 
   DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedTime = TimeOfDay.now();
 
-  // DATE PICKER
-  Future<void> pickDate(BuildContext context) async {
+  Future<void> pickDate(
+      BuildContext context) async {
+
     final picked = await showDatePicker(
+
       context: context,
+
       initialDate: selectedDate,
+
       firstDate: DateTime(2020),
+
       lastDate: DateTime.now(),
     );
 
     if (picked != null) {
-      setState(() => selectedDate = picked);
+
+      setState(() {
+        selectedDate = picked;
+      });
     }
-  }
-
-  // TIME PICKER
-  Future<void> pickTime(BuildContext context) async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: selectedTime,
-    );
-
-    if (picked != null) {
-      setState(() => selectedTime = picked);
-    }
-  }
-
-  String formatTime(TimeOfDay time) {
-    final h = time.hour.toString().padLeft(2, '0');
-    final m = time.minute.toString().padLeft(2, '0');
-    return "$h:$m";
   }
 
   void saveRun() async {
-    if (!_formKey.currentState!.validate()) return;
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final db = DBHelper();
 
     await db.insertRun({
+
       'userId': Session.userId,
-      'distance': double.parse(distanceController.text),
-      'duration': formatTime(selectedTime),
+
+      'distance': double.parse(
+        distanceController.text,
+      ),
+
+      // 🔥 SIMPAN MENIT SAJA
+      'duration': int.parse(
+        durationController.text,
+      ),
+
       'note': noteController.text,
+
       'date': selectedDate.toString(),
     });
 
@@ -66,65 +80,188 @@ class _AddRunScreenState extends State<AddRunScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      appBar: AppBar(title: Text("Tambah Lari")),
+
+      appBar: AppBar(
+        title: const Text("Tambah Lari"),
+      ),
+
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+
+        padding: const EdgeInsets.all(20),
+
         child: Form(
+
           key: _formKey,
+
           child: Column(
+
             children: [
 
               TextFormField(
+
                 controller: distanceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: "Jarak (km)"),
+
+                keyboardType:
+                    TextInputType.number,
+
+                decoration: InputDecoration(
+
+                  labelText: "Jarak (km)",
+
+                  prefixIcon:
+                      const Icon(Icons.route),
+
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(16),
+                  ),
+                ),
+
                 validator: (v) =>
-                    v == null || v.isEmpty ? "Wajib diisi" : null,
+                    v == null || v.isEmpty
+                        ? "Wajib diisi"
+                        : null,
               ),
 
-              SizedBox(height: 12),
-
-              // TIME PICKER
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Durasi: ${formatTime(selectedTime)}"),
-                  ElevatedButton(
-                    onPressed: () => pickTime(context),
-                    child: Text("Pilih"),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 12),
-
-              // DATE PICKER
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Tanggal: ${selectedDate.toLocal().toString().split(' ')[0]}",
-                  ),
-                  ElevatedButton(
-                    onPressed: () => pickDate(context),
-                    child: Text("Pilih"),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 12),
+              const SizedBox(height: 18),
 
               TextFormField(
-                controller: noteController,
-                decoration: InputDecoration(labelText: "Catatan"),
+
+                controller: durationController,
+
+                keyboardType:
+                    TextInputType.number,
+
+                decoration: InputDecoration(
+
+                  labelText:
+                      "Durasi (menit)",
+
+                  hintText:
+                      "Contoh: 45",
+
+                  prefixIcon:
+                      const Icon(Icons.timer),
+
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(16),
+                  ),
+                ),
+
+                validator: (v) =>
+                    v == null || v.isEmpty
+                        ? "Wajib diisi"
+                        : null,
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 18),
 
-              ElevatedButton(
-                onPressed: saveRun,
-                child: Text("Simpan"),
+              Container(
+
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 18,
+                ),
+
+                decoration: BoxDecoration(
+
+                  border: Border.all(
+                    color: Colors.grey.shade400,
+                  ),
+
+                  borderRadius:
+                      BorderRadius.circular(16),
+                ),
+
+                child: Row(
+
+                  mainAxisAlignment:
+                      MainAxisAlignment
+                          .spaceBetween,
+
+                  children: [
+
+                    Text(
+
+                      "📅 ${selectedDate.toLocal().toString().split(' ')[0]}",
+
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+
+                    ElevatedButton(
+
+                      onPressed: () =>
+                          pickDate(context),
+
+                      child: const Text(
+                        "Pilih",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              TextFormField(
+
+                controller: noteController,
+
+                maxLines: 3,
+
+                decoration: InputDecoration(
+
+                  labelText: "Catatan",
+
+                  prefixIcon:
+                      const Icon(Icons.notes),
+
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              SizedBox(
+
+                width: double.infinity,
+
+                child: ElevatedButton.icon(
+
+                  onPressed: saveRun,
+
+                  icon: const Icon(Icons.save),
+
+                  label: const Text(
+                    "Simpan Aktivitas",
+                  ),
+
+                  style:
+                      ElevatedButton.styleFrom(
+
+                    padding:
+                        const EdgeInsets.symmetric(
+                      vertical: 16,
+                    ),
+
+                    shape:
+                        RoundedRectangleBorder(
+
+                      borderRadius:
+                          BorderRadius.circular(
+                        18,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

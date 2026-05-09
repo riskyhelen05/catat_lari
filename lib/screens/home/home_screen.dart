@@ -7,13 +7,17 @@ import '../run/add_run_screen.dart';
 import '../run/detail_run_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+
+  const HomeScreen({super.key});
+
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() =>
+      _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState
+    extends State<HomeScreen> {
 
-  // 🔥 AMBIL DATA LARI
   Future<List<Map<String, dynamic>>> getRuns() async {
 
     final db = await DBHelper().database;
@@ -26,15 +30,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔥 STATISTIK
   Future<Map<String, dynamic>> getStatistics() async {
 
     final db = await DBHelper().database;
 
     final result = await db.rawQuery('''
       SELECT
-        COUNT(*) as totalRun,
-        SUM(distance) as totalDistance
+      COUNT(*) as totalRun,
+      SUM(distance) as totalDistance
       FROM runs
       WHERE userId = ?
     ''', [Session.userId]);
@@ -42,21 +45,17 @@ class _HomeScreenState extends State<HomeScreen> {
     return result.first;
   }
 
-  // 🔥 LOGOUT
-  void logout(BuildContext context) {
-
-    Session.clear();
-
-    Navigator.pushReplacementNamed(context, '/');
-  }
-
   @override
   Widget build(BuildContext context) {
+
+    final isDark =
+        Theme.of(context).brightness ==
+            Brightness.dark;
 
     return Scaffold(
 
       appBar: AppBar(
-        title: Text("Catat Lari"),
+        title: const Text("Catat Lari"),
         centerTitle: true,
       ),
 
@@ -67,876 +66,601 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, statSnapshot) {
 
           if (!statSnapshot.hasData) {
-            return Center(
+
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
           final stats = statSnapshot.data!;
 
-          return Column(
+          return FutureBuilder<List<Map<String, dynamic>>>(
 
-            children: [
+            future: getRuns(),
 
-              // 🔥 GREETING USER
-              Padding(
+            builder: (context, snapshot) {
 
-                padding: EdgeInsets.only(
-                  left: 20,
-                  right: 20,
-                  top: 20,
-                ),
+              if (!snapshot.hasData) {
 
-                child: Row(
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-                  children: [
+              final data = snapshot.data!;
 
-                    CircleAvatar(
+              return SingleChildScrollView(
 
-                      radius: 26,
+                child: Padding(
 
-                      backgroundColor: Color(0xFF2196F3),
-
-                      child: Text(
-
-                        Session.username != null
-                            ? Session.username![0]
-                                .toUpperCase()
-                            : "U",
-
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(width: 14),
-
-                    Expanded(
-
-                      child: Column(
-
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
-
-                        children: [
-
-                          Text(
-                            "Halo, ${Session.username ?? 'User'} 👋",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          SizedBox(height: 4),
-
-                          Text(
-                            "Siap untuk lari hari ini?",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 10),
-
-              // 🔥 DASHBOARD GRADIENT
-              Container(
-
-                margin: EdgeInsets.all(16),
-
-                padding: EdgeInsets.all(20),
-
-                decoration: BoxDecoration(
-
-                  gradient: LinearGradient(
-
-                    colors: [
-                      Color(0xFF2196F3),
-                      Color(0xFF4CAF50),
-                    ],
-
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  padding: const EdgeInsets.only(
+                    bottom: 100,
                   ),
 
-                  borderRadius:
-                      BorderRadius.circular(24),
+                  child: Column(
 
-                  boxShadow: [
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
 
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
+                    children: [
 
-                child: Column(
+                      // 🔥 GREETING
+                      Padding(
 
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                        padding: const EdgeInsets.all(20),
 
-                  children: [
+                        child: Row(
 
-                    // 🔥 HEADER
-                    Row(
+                          children: [
 
-                      children: [
+                            CircleAvatar(
 
-                        CircleAvatar(
+                              radius: 30,
 
-                          radius: 24,
+                              backgroundColor:
+                                  Colors.blue,
 
-                          backgroundColor: Colors.white,
+                              child: Text(
 
-                          child: Icon(
-                            Icons.directions_run,
-                            color: Color(0xFF2196F3),
-                            size: 28,
-                          ),
-                        ),
+                                Session.username != null
+                                    ? Session.username![0]
+                                        .toUpperCase()
+                                    : "U",
 
-                        SizedBox(width: 14),
-
-                        Expanded(
-
-                          child: Column(
-
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-
-                            children: [
-
-                              Text(
-                                "Tetap Semangat 💪",
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 20,
+                                  fontSize: 24,
                                   fontWeight:
                                       FontWeight.bold,
                                 ),
                               ),
-
-                              SizedBox(height: 4),
-
-                              Text(
-                                "Jaga kesehatan dengan rutin berolahraga",
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 24),
-
-                    // 🔥 STATISTIK
-                    Row(
-
-                      children: [
-
-                        // TOTAL RUN
-                        Expanded(
-
-                          child: Container(
-
-                            padding: EdgeInsets.all(16),
-
-                            decoration: BoxDecoration(
-
-                              color: Colors.white
-                                  .withOpacity(0.2),
-
-                              borderRadius:
-                                  BorderRadius.circular(18),
                             ),
 
-                            child: Column(
+                            const SizedBox(width: 14),
 
-                              children: [
+                            Expanded(
 
-                                Icon(
-                                  Icons.flag,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
+                              child: Column(
 
-                                SizedBox(height: 8),
+                                crossAxisAlignment:
+                                    CrossAxisAlignment
+                                        .start,
 
-                                Text(
-                                  "${stats['totalRun'] ?? 0}",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight:
-                                        FontWeight.bold,
-                                  ),
-                                ),
+                                children: [
 
-                                SizedBox(height: 4),
+                                  Text(
 
-                                Text(
-                                  "Total Run",
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                                    "Halo, ${Session.username ?? 'User'} 👋",
 
-                        SizedBox(width: 14),
-
-                        // TOTAL DISTANCE
-                        Expanded(
-
-                          child: Container(
-
-                            padding: EdgeInsets.all(16),
-
-                            decoration: BoxDecoration(
-
-                              color: Colors.white
-                                  .withOpacity(0.2),
-
-                              borderRadius:
-                                  BorderRadius.circular(18),
-                            ),
-
-                            child: Column(
-
-                              children: [
-
-                                Icon(
-                                  Icons.route,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-
-                                SizedBox(height: 8),
-
-                                Text(
-                                  "${(stats['totalDistance'] ?? 0).toString()} km",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight:
-                                        FontWeight.bold,
-                                  ),
-                                ),
-
-                                SizedBox(height: 4),
-
-                                Text(
-                                  "Distance",
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // 🔥 MOTIVATIONAL BANNER
-              Container(
-
-                margin: EdgeInsets.symmetric(
-                  horizontal: 16,
-                ),
-
-                padding: EdgeInsets.all(18),
-
-                decoration: BoxDecoration(
-
-                  color: Colors.orange.shade100,
-
-                  borderRadius:
-                      BorderRadius.circular(20),
-
-                  border: Border.all(
-                    color: Colors.orange.shade300,
-                  ),
-                ),
-
-                child: Row(
-
-                  children: [
-
-                    Icon(
-                      Icons.favorite,
-                      color: Colors.orange,
-                      size: 34,
-                    ),
-
-                    SizedBox(width: 14),
-
-                    Expanded(
-
-                      child: Column(
-
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
-
-                        children: [
-
-                          Text(
-                            "Hidup Sehat 🌿",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          SizedBox(height: 4),
-
-                          Text(
-                            "Lari rutin membantu menjaga kesehatan tubuh dan pikiran.",
-                            style: TextStyle(
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 12),
-
-              // 🔥 LIST DATA
-              Expanded(
-
-                child: FutureBuilder<List<Map<String, dynamic>>>(
-
-                  future: getRuns(),
-
-                  builder: (context, snapshot) {
-
-                    if (!snapshot.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-
-                    final data = snapshot.data!;
-
-                    if (data.isEmpty) {
-
-                      return Center(
-
-                        child: Column(
-
-                          mainAxisAlignment:
-                              MainAxisAlignment.center,
-
-                          children: [
-
-                            Icon(
-                              Icons.directions_run,
-                              size: 80,
-                              color: Colors.grey,
-                            ),
-
-                            SizedBox(height: 12),
-
-                            Text(
-                              "Belum ada data lari",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight:
-                                    FontWeight.bold,
-                              ),
-                            ),
-
-                            SizedBox(height: 6),
-
-                            Text(
-                              "Yuk mulai catat aktivitas larimu 🚀",
-                              style: TextStyle(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-
-                      itemCount: data.length,
-
-                      itemBuilder: (context, index) {
-
-                        final run = data[index];
-
-                        return Dismissible(
-
-                          key: Key(
-                            run['id'].toString(),
-                          ),
-
-                          direction:
-                              DismissDirection.endToStart,
-
-                          background: Container(
-
-                            margin: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-
-                            padding: EdgeInsets.only(
-                              right: 20,
-                            ),
-
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius:
-                                  BorderRadius.circular(12),
-                            ),
-
-                            alignment:
-                                Alignment.centerRight,
-
-                            child: Icon(
-                              Icons.delete,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-
-                          // 🔥 KONFIRMASI DELETE
-                          confirmDismiss:
-                              (direction) async {
-
-                            return await showDialog(
-
-                              context: context,
-
-                              builder: (_) => AlertDialog(
-
-                                title:
-                                    Text("Hapus Data"),
-
-                                content: Text(
-                                  "Yakin ingin menghapus data ini?",
-                                ),
-
-                                actions: [
-
-                                  TextButton(
-
-                                    onPressed: () {
-
-                                      Navigator.pop(
-                                        context,
-                                        false,
-                                      );
-                                    },
-
-                                    child: Text("Batal"),
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight:
+                                          FontWeight.bold,
+                                    ),
                                   ),
 
-                                  TextButton(
+                                  const SizedBox(height: 4),
 
-                                    onPressed: () {
+                                  const Text(
 
-                                      Navigator.pop(
-                                        context,
-                                        true,
-                                      );
-                                    },
+                                    "Siap untuk lari hari ini?",
 
-                                    child: Text(
-
-                                      "Hapus",
-
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                      ),
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 15,
                                     ),
                                   ),
                                 ],
                               ),
-                            );
-                          },
+                            ),
+                          ],
+                        ),
+                      ),
 
-                          // 🔥 DELETE + UNDO
-                          onDismissed:
-                              (direction) async {
+                      // 🔥 DASHBOARD
+                      Container(
 
-                            final deletedRun =
-                                Map<String, dynamic>
-                                    .from(run);
+                        margin:
+                            const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
 
-                            final db =
-                                await DBHelper()
-                                    .database;
+                        padding:
+                            const EdgeInsets.all(22),
 
-                            await db.delete(
+                        decoration: BoxDecoration(
 
-                              'runs',
+                          gradient:
+                              const LinearGradient(
 
-                              where: 'id = ?',
+                            colors: [
+                              Color(0xFF2196F3),
+                              Color(0xFF4CAF50),
+                            ],
 
-                              whereArgs: [
-                                run['id']
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+
+                          borderRadius:
+                              BorderRadius.circular(28),
+
+                          boxShadow: [
+
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                        ),
+
+                        child: Column(
+
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+
+                          children: [
+
+                            Row(
+
+                              children: [
+
+                                Container(
+
+                                  padding:
+                                      const EdgeInsets.all(
+                                    14,
+                                  ),
+
+                                  decoration:
+                                      BoxDecoration(
+
+                                    color: Colors.white
+                                        .withOpacity(0.2),
+
+                                    borderRadius:
+                                        BorderRadius.circular(
+                                      18,
+                                    ),
+                                  ),
+
+                                  child: const Icon(
+                                    Icons.directions_run,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 14),
+
+                                const Expanded(
+
+                                  child: Column(
+
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment
+                                            .start,
+
+                                    children: [
+
+                                      Text(
+
+                                        "Tetap Semangat 💪",
+
+                                        style: TextStyle(
+                                          color:
+                                              Colors.white,
+                                          fontSize: 20,
+                                          fontWeight:
+                                              FontWeight
+                                                  .bold,
+                                        ),
+                                      ),
+
+                                      SizedBox(height: 4),
+
+                                      Text(
+
+                                        "Jaga kesehatan dengan rutin berolahraga",
+
+                                        style: TextStyle(
+                                          color:
+                                              Colors.white70,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
-                            );
+                            ),
 
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(
+                            const SizedBox(height: 24),
 
-                              SnackBar(
+                            Row(
 
-                                content: Text(
-                                  "Data berhasil dihapus",
+                              children: [
+
+                                Expanded(
+
+                                  child: _buildStatCard(
+                                    Icons.flag,
+                                    "${stats['totalRun'] ?? 0}",
+                                    "Total Run",
+                                  ),
                                 ),
 
-                                action:
-                                    SnackBarAction(
+                                const SizedBox(width: 14),
 
-                                  label: "UNDO",
+                                Expanded(
 
-                                  onPressed: () async {
-
-                                    await db.insert(
-                                      'runs',
-                                      deletedRun,
-                                    );
-
-                                    setState(() {});
-                                  },
+                                  child: _buildStatCard(
+                                    Icons.route,
+                                    "${stats['totalDistance'] ?? 0} km",
+                                    "Distance",
+                                  ),
                                 ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // 🔥 MOTIVATION
+                      Container(
+
+                        margin:
+                            const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
+
+                        padding:
+                            const EdgeInsets.all(18),
+
+                        decoration: BoxDecoration(
+
+                          color: isDark
+                              ? Colors.orange
+                                  .withOpacity(0.15)
+                              : Colors.orange.shade100,
+
+                          borderRadius:
+                              BorderRadius.circular(22),
+
+                          border: Border.all(
+
+                            color: isDark
+                                ? Colors.orange
+                                    .withOpacity(0.4)
+                                : Colors.orange.shade300,
+                          ),
+                        ),
+
+                        child: Row(
+
+                          children: [
+
+                            const Icon(
+                              Icons.favorite,
+                              color: Colors.orange,
+                              size: 34,
+                            ),
+
+                            const SizedBox(width: 14),
+
+                            Expanded(
+
+                              child: Column(
+
+                                crossAxisAlignment:
+                                    CrossAxisAlignment
+                                        .start,
+
+                                children: [
+
+                                  const Text(
+
+                                    "Hidup Sehat 🌿",
+
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight:
+                                          FontWeight.bold,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 4),
+
+                                  Text(
+
+                                    "Lari rutin membantu menjaga kesehatan tubuh dan pikiran.",
+
+                                    style: TextStyle(
+
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black87,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            );
+                            ),
+                          ],
+                        ),
+                      ),
 
-                            setState(() {});
-                          },
+                      const SizedBox(height: 28),
 
-                          // 🔥 RUN CARD
-                          child: Card(
+                      // 🔥 TITLE
+                      const Padding(
 
-                            elevation: 4,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                        ),
 
-                            margin: EdgeInsets.symmetric(
-                              horizontal: 14,
+                        child: Text(
+
+                          "Recent Activity",
+
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight:
+                                FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // 🔥 EMPTY STATE
+                      if (data.isEmpty)
+
+                        Padding(
+
+                          padding:
+                              const EdgeInsets.only(
+                            top: 80,
+                          ),
+
+                          child: Center(
+
+                            child: Column(
+
+                              children: const [
+
+                                Icon(
+                                  Icons.directions_run,
+                                  size: 80,
+                                  color: Colors.grey,
+                                ),
+
+                                SizedBox(height: 14),
+
+                                Text(
+
+                                  "Belum ada data lari",
+
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight:
+                                        FontWeight.bold,
+                                  ),
+                                ),
+
+                                SizedBox(height: 6),
+
+                                Text(
+                                  "Yuk mulai catat aktivitas larimu 🚀",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                      // 🔥 LIST ACTIVITY
+                      ListView.builder(
+
+                        itemCount:
+                            data.length > 3
+                                ? 3
+                                : data.length,
+
+                        shrinkWrap: true,
+
+                        physics:
+                            const NeverScrollableScrollPhysics(),
+
+                        itemBuilder: (context, index) {
+
+                          final run = data[index];
+
+                          return Card(
+
+                            elevation: 3,
+
+                            margin:
+                                const EdgeInsets.symmetric(
+                              horizontal: 16,
                               vertical: 8,
                             ),
 
-                            shape: RoundedRectangleBorder(
+                            shape:
+                                RoundedRectangleBorder(
+
                               borderRadius:
-                                  BorderRadius.circular(22),
+                                  BorderRadius.circular(
+                                22,
+                              ),
                             ),
 
                             child: InkWell(
 
                               borderRadius:
-                                  BorderRadius.circular(22),
+                                  BorderRadius.circular(
+                                22,
+                              ),
 
-                              onTap: () {
+                              onTap: () async {
 
-                                Navigator.push(
+  final result = await Navigator.push(
 
-                                  context,
+    context,
 
-                                  MaterialPageRoute(
+    MaterialPageRoute(
 
-                                    builder: (_) =>
-                                        DetailRunScreen(
-                                      run: run,
-                                    ),
-                                  ),
-                                ).then(
-                                  (_) => setState(() {}),
-                                );
-                              },
+      builder: (_) =>
+          DetailRunScreen(
+        run: run,
+      ),
+    ),
+  );
+
+  if (result == true) {
+
+    setState(() {});
+  }
+},
 
                               child: Padding(
 
                                 padding:
-                                    EdgeInsets.all(18),
+                                    const EdgeInsets.all(
+                                  18,
+                                ),
 
-                                child: Column(
-
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
+                                child: Row(
 
                                   children: [
 
-                                    // 🔥 HEADER
-                                    Row(
+                                    Container(
 
-                                      children: [
+                                      padding:
+                                          const EdgeInsets
+                                              .all(14),
 
-                                        Container(
+                                      decoration:
+                                          BoxDecoration(
 
-                                          padding:
-                                              EdgeInsets
-                                                  .all(12),
-
-                                          decoration:
-                                              BoxDecoration(
-
-                                            color: Colors
-                                                .blue
-                                                .shade100,
-
-                                            borderRadius:
-                                                BorderRadius.circular(
-                                                    16),
-                                          ),
-
-                                          child: Icon(
-                                            Icons
-                                                .directions_run,
-                                            color:
-                                                Colors.blue,
-                                            size: 28,
-                                          ),
+                                        color: Colors.blue
+                                            .withOpacity(
+                                          0.12,
                                         ),
 
-                                        SizedBox(width: 14),
-
-                                        Expanded(
-
-                                          child: Column(
-
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment
-                                                    .start,
-
-                                            children: [
-
-                                              Text(
-                                                "Running Activity",
-                                                style:
-                                                    TextStyle(
-                                                  fontSize:
-                                                      17,
-                                                  fontWeight:
-                                                      FontWeight.bold,
-                                                ),
-                                              ),
-
-                                              SizedBox(
-                                                  height: 4),
-
-                                              Text(
-                                                run['date']
-                                                    .toString()
-                                                    .split(
-                                                        ' ')[0],
-                                                style:
-                                                    TextStyle(
-                                                  color:
-                                                      Colors.grey,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        Icon(
-                                          Icons
-                                              .arrow_forward_ios,
-                                          size: 18,
-                                          color: Colors.grey,
-                                        ),
-                                      ],
-                                    ),
-
-                                    SizedBox(height: 18),
-
-                                    // 🔥 STATS
-                                    Row(
-
-                                      mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .spaceAround,
-
-                                      children: [
-
-                                        // DISTANCE
-                                        Column(
-
-                                          children: [
-
-                                            Icon(
-                                              Icons.route,
-                                              color:
-                                                  Colors.green,
-                                            ),
-
-                                            SizedBox(
-                                                height: 6),
-
-                                            Text(
-                                              "${run['distance']} km",
-                                              style:
-                                                  TextStyle(
-                                                fontWeight:
-                                                    FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-
-                                            SizedBox(
-                                                height: 2),
-
-                                            Text(
-                                              "Distance",
-                                              style:
-                                                  TextStyle(
-                                                color:
-                                                    Colors.grey,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-
-                                        // DURATION
-                                        Column(
-
-                                          children: [
-
-                                            Icon(
-                                              Icons.timer,
-                                              color:
-                                                  Colors.orange,
-                                            ),
-
-                                            SizedBox(
-                                                height: 6),
-
-                                            Text(
-                                              "${run['duration']}",
-                                              style:
-                                                  TextStyle(
-                                                fontWeight:
-                                                    FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-
-                                            SizedBox(
-                                                height: 2),
-
-                                            Text(
-                                              "Duration",
-                                              style:
-                                                  TextStyle(
-                                                color:
-                                                    Colors.grey,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-
-                                    // 🔥 NOTE
-                                    if (run['note'] !=
-                                            null &&
-                                        run['note'] != "")
-
-                                      Padding(
-
-                                        padding:
-                                            EdgeInsets.only(
-                                          top: 18,
-                                        ),
-
-                                        child: Container(
-
-                                          width:
-                                              double.infinity,
-
-                                          padding:
-                                              EdgeInsets.all(
-                                                  14),
-
-                                          decoration:
-                                              BoxDecoration(
-
-                                            color: Colors
-                                                .grey
-                                                .shade100,
-
-                                            borderRadius:
-                                                BorderRadius.circular(
-                                                    14),
-                                          ),
-
-                                          child: Row(
-
-                                            children: [
-
-                                              Icon(
-                                                Icons.notes,
-                                                color:
-                                                    Colors.grey,
-                                              ),
-
-                                              SizedBox(
-                                                  width: 10),
-
-                                              Expanded(
-
-                                                child: Text(
-                                                  run['note'],
-                                                  style:
-                                                      TextStyle(
-                                                    color: Colors
-                                                        .black87,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                        borderRadius:
+                                            BorderRadius
+                                                .circular(
+                                          18,
                                         ),
                                       ),
+
+                                      child: const Icon(
+                                        Icons
+                                            .directions_run,
+                                        color:
+                                            Colors.blue,
+                                        size: 28,
+                                      ),
+                                    ),
+
+                                    const SizedBox(
+                                      width: 16,
+                                    ),
+
+                                    Expanded(
+
+                                      child: Column(
+
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment
+                                                .start,
+
+                                        children: [
+
+                                          Text(
+
+                                            "${run['distance']} km",
+
+                                            style:
+                                                const TextStyle(
+                                              fontSize:
+                                                  18,
+                                              fontWeight:
+                                                  FontWeight
+                                                      .bold,
+                                            ),
+                                          ),
+
+                                          const SizedBox(
+                                            height: 4,
+                                          ),
+
+                                          Text(
+
+                                            run['date']
+                                                .toString()
+                                                .split(
+                                                    ' ')[0],
+
+                                            style:
+                                                const TextStyle(
+                                              color:
+                                                  Colors
+                                                      .grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    const Icon(
+                                      Icons
+                                          .arrow_forward_ios,
+                                      size: 18,
+                                      color: Colors.grey,
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              );
+            },
           );
         },
       ),
 
-      // 🔥 TAMBAH DATA
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton:
+          FloatingActionButton(
 
         onPressed: () {
 
@@ -945,12 +669,70 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
 
             MaterialPageRoute(
-              builder: (_) => AddRunScreen(),
+              builder: (_) =>
+                  AddRunScreen(),
             ),
           ).then((_) => setState(() {}));
         },
 
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    IconData icon,
+    String value,
+    String label,
+  ) {
+
+    return Container(
+
+      padding: const EdgeInsets.all(16),
+
+      decoration: BoxDecoration(
+
+        color: Colors.white.withOpacity(0.2),
+
+        borderRadius:
+            BorderRadius.circular(20),
+      ),
+
+      child: Column(
+
+        children: [
+
+          Icon(
+            icon,
+            color: Colors.white,
+            size: 30,
+          ),
+
+          const SizedBox(height: 10),
+
+          Text(
+
+            value,
+
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight:
+                  FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+
+            label,
+
+            style: const TextStyle(
+              color: Colors.white70,
+            ),
+          ),
+        ],
       ),
     );
   }

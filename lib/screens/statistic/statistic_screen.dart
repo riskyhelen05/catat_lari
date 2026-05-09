@@ -31,10 +31,15 @@ class _StatisticScreenState
   @override
   Widget build(BuildContext context) {
 
+    final isDark =
+        Theme.of(context).brightness ==
+            Brightness.dark;
+
     return Scaffold(
 
       appBar: AppBar(
-        title: Text("Statistik Lari"),
+        title: const Text("Statistik"),
+        centerTitle: true,
       ),
 
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -44,37 +49,91 @@ class _StatisticScreenState
         builder: (context, snapshot) {
 
           if (!snapshot.hasData) {
-            return Center(
+
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
           final data = snapshot.data!;
 
+          // 🔥 EMPTY STATE
           if (data.isEmpty) {
+
             return Center(
-              child: Text("Belum ada data statistik"),
-            );
-          }
 
-          List<FlSpot> spots = [];
+              child: Padding(
 
-          for (int i = 0; i < data.length; i++) {
+                padding: const EdgeInsets.all(24),
 
-            spots.add(
+                child: Column(
 
-              FlSpot(
-                i.toDouble(),
-                double.parse(
-                  data[i]['distance'].toString(),
+                  mainAxisAlignment:
+                      MainAxisAlignment.center,
+
+                  children: [
+
+                    Icon(
+                      Icons.bar_chart,
+                      size: 90,
+                      color: Colors.grey.shade400,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    const Text(
+
+                      "Belum Ada Statistik",
+
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Text(
+
+                      "Mulai catat aktivitas larimu\nuntuk melihat perkembangan.",
+
+                      textAlign: TextAlign.center,
+
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
           }
 
-          return Padding(
+          List<FlSpot> spots = [];
 
-            padding: EdgeInsets.all(16),
+          double totalDistance = 0;
+
+          for (int i = 0; i < data.length; i++) {
+
+            final distance =
+                double.parse(
+                  data[i]['distance'].toString(),
+                );
+
+            totalDistance += distance;
+
+            spots.add(
+              FlSpot(i.toDouble(), distance),
+            );
+          }
+
+          final averageDistance =
+              totalDistance / data.length;
+
+          return SingleChildScrollView(
+
+            padding: const EdgeInsets.all(20),
 
             child: Column(
 
@@ -83,63 +142,447 @@ class _StatisticScreenState
 
               children: [
 
+                // 🔥 HEADER
+                const Text(
+
+                  "Progress Larimu 📈",
+
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
                 Text(
-                  "Grafik Jarak Lari",
+
+                  "Pantau perkembangan aktivitas lari kamu",
+
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 15,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // 🔥 SUMMARY CARD
+                Container(
+
+                  padding: const EdgeInsets.all(24),
+
+                  decoration: BoxDecoration(
+
+                    gradient: const LinearGradient(
+
+                      colors: [
+                        Color(0xFF2196F3),
+                        Color(0xFF4CAF50),
+                      ],
+
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+
+                    borderRadius:
+                        BorderRadius.circular(28),
+
+                    boxShadow: [
+
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 12,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+
+                  child: Row(
+
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceAround,
+
+                    children: [
+
+                      // TOTAL RUN
+                      Column(
+
+                        children: [
+
+                          const Icon(
+                            Icons.flag,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          Text(
+
+                            "${data.length}",
+
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 4),
+
+                          const Text(
+
+                            "Total Run",
+
+                            style: TextStyle(
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      Container(
+                        width: 1,
+                        height: 80,
+                        color: Colors.white24,
+                      ),
+
+                      // TOTAL DISTANCE
+                      Column(
+
+                        children: [
+
+                          const Icon(
+                            Icons.route,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          Text(
+
+                            "${totalDistance.toStringAsFixed(1)} km",
+
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 4),
+
+                          const Text(
+
+                            "Distance",
+
+                            style: TextStyle(
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // 🔥 AVERAGE CARD
+                Container(
+
+                  padding: const EdgeInsets.all(20),
+
+                  decoration: BoxDecoration(
+
+                    color: isDark
+                        ? const Color(0xFF1E1E1E)
+                        : Colors.white,
+
+                    borderRadius:
+                        BorderRadius.circular(24),
+
+                    boxShadow: [
+
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+
+                  child: Row(
+
+                    children: [
+
+                      Container(
+
+                        padding:
+                            const EdgeInsets.all(14),
+
+                        decoration: BoxDecoration(
+
+                          color: Colors.orange
+                              .withOpacity(0.15),
+
+                          borderRadius:
+                              BorderRadius.circular(18),
+                        ),
+
+                        child: const Icon(
+                          Icons.insights,
+                          color: Colors.orange,
+                          size: 32,
+                        ),
+                      ),
+
+                      const SizedBox(width: 16),
+
+                      Expanded(
+
+                        child: Column(
+
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+
+                          children: [
+
+                            const Text(
+
+                              "Rata-rata Jarak",
+
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight:
+                                    FontWeight.bold,
+                              ),
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            Text(
+
+                              "${averageDistance.toStringAsFixed(1)} km / lari",
+
+                              style: TextStyle(
+                                color:
+                                    Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // 🔥 CHART TITLE
+                const Text(
+
+                  "Grafik Performa",
+
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                SizedBox(height: 30),
+                const SizedBox(height: 20),
 
-                Expanded(
+                // 🔥 CHART CARD
+                Container(
 
-                  child: LineChart(
+                  padding: const EdgeInsets.all(20),
 
-                    LineChartData(
+                  decoration: BoxDecoration(
 
-                      gridData: FlGridData(
-                        show: true,
+                    color: isDark
+                        ? const Color(0xFF1E1E1E)
+                        : Colors.white,
+
+                    borderRadius:
+                        BorderRadius.circular(28),
+
+                    boxShadow: [
+
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
                       ),
+                    ],
+                  ),
 
-                      borderData: FlBorderData(
-                        show: true,
-                      ),
+                  child: SizedBox(
 
-                      titlesData: FlTitlesData(
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
+                    height: 300,
+
+                    child: LineChart(
+
+                      LineChartData(
+
+                        minY: 0,
+
+                        gridData: FlGridData(
+                          show: true,
+                        ),
+
+                        borderData:
+                            FlBorderData(show: false),
+
+                        titlesData: FlTitlesData(
+
+                          topTitles: AxisTitles(
+                            sideTitles:
+                                SideTitles(
+                              showTitles: false,
+                            ),
+                          ),
+
+                          rightTitles: AxisTitles(
+                            sideTitles:
+                                SideTitles(
+                              showTitles: false,
+                            ),
+                          ),
+
+                          leftTitles: AxisTitles(
+
+                            sideTitles:
+                                SideTitles(
+
+                              showTitles: true,
+
+                              reservedSize: 40,
+                            ),
+                          ),
+
+                          bottomTitles: AxisTitles(
+
+                            sideTitles:
+                                SideTitles(
+
+                              showTitles: true,
+
+                              getTitlesWidget:
+                                  (value, meta) {
+
+                                return Padding(
+
+                                  padding:
+                                      const EdgeInsets.only(
+                                    top: 8,
+                                  ),
+
+                                  child: Text(
+                                    "${value.toInt() + 1}",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color:
+                                          Colors.grey.shade600,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ),
 
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
+                        lineBarsData: [
+
+                          LineChartBarData(
+
+                            spots: spots,
+
+                            isCurved: true,
+
+                            barWidth: 5,
+
+                            color: Colors.green,
+
+                            dotData: FlDotData(
+                              show: true,
+                            ),
+
+                            belowBarData:
+                                BarAreaData(
+
+                              show: true,
+
+                              color: Colors.green
+                                  .withOpacity(0.2),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-
-                      lineBarsData: [
-
-                        LineChartBarData(
-
-                          spots: spots,
-
-                          isCurved: true,
-
-                          dotData: FlDotData(
-                            show: true,
-                          ),
-
-                          belowBarData:
-                              BarAreaData(show: true),
-                        ),
-                      ],
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 28),
+
+                // 🔥 MOTIVATION
+                Container(
+
+                  width: double.infinity,
+
+                  padding: const EdgeInsets.all(22),
+
+                  decoration: BoxDecoration(
+
+                    color: Colors.green
+                        .withOpacity(0.12),
+
+                    borderRadius:
+                        BorderRadius.circular(24),
+                  ),
+
+                  child: Column(
+
+                    children: [
+
+                      const Icon(
+                        Icons.favorite,
+                        color: Colors.green,
+                        size: 34,
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      const Text(
+
+                        "Tetap Konsisten 💪",
+
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+
+                        "Konsistensi kecil setiap hari menghasilkan perubahan besar.",
+
+                        textAlign: TextAlign.center,
+
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 30),
               ],
             ),
           );

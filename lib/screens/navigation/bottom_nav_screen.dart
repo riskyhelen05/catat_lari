@@ -5,6 +5,8 @@ import '../profile/profile_screen.dart';
 import '../statistic/statistic_screen.dart';
 
 class BottomNavScreen extends StatefulWidget {
+  const BottomNavScreen({super.key});
+
   @override
   State<BottomNavScreen> createState() =>
       _BottomNavScreenState();
@@ -26,19 +28,33 @@ class _BottomNavScreenState
 
     return Scaffold(
 
-      body: pages[currentIndex],
+      body: IndexedStack(
+        index: currentIndex,
+        children: pages,
+      ),
 
       bottomNavigationBar: BottomNavigationBar(
 
         currentIndex: currentIndex,
 
+        type: BottomNavigationBarType.fixed,
+
+        selectedItemColor: Colors.blue,
+
+        unselectedItemColor: Colors.grey,
+
+        showUnselectedLabels: false,
+
+        elevation: 10,
+
         onTap: (index) {
+
           setState(() {
             currentIndex = index;
           });
         },
 
-        items: [
+        items: const [
 
           BottomNavigationBarItem(
             icon: Icon(Icons.home),

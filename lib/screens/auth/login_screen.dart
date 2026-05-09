@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../home/home_screen.dart';
-
 import '../../data/user_data.dart';
 
 import '../../database/db_helper.dart';
 
 import '../../database/session.dart';
+
+import '../navigation/bottom_nav_screen.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -88,22 +88,9 @@ ScaffoldMessenger.of(context).showSnackBar(
 Navigator.pushReplacement(
   context,
   MaterialPageRoute(
-    builder: (context) => HomeScreen(),
+    builder: (context) => const BottomNavScreen(),
   ),
 );
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text("Login berhasil"),
-    ),
-  );
-
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (context) => HomeScreen(),
-    ),
-  );
 }
 
   @override
@@ -185,14 +172,37 @@ Navigator.pushReplacement(
               SizedBox(height: 30),
 
               SizedBox(
-                width: double.infinity,
+  width: double.infinity,
 
-                child: ElevatedButton(
-                  onPressed: doLogin,
+  child: ElevatedButton(
+    onPressed: doLogin,
 
-                  child: Text("Login"),
-                ),
-              ),
+    child: Text("Login"),
+  ),
+),
+
+const SizedBox(height: 20),
+
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+
+  children: [
+
+    const Text("Belum punya akun?"),
+
+    TextButton(
+      onPressed: () {
+
+        Navigator.pushNamed(
+          context,
+          '/register',
+        );
+      },
+
+      child: const Text("Daftar"),
+    ),
+  ],
+),
             ],
           ),
         ),

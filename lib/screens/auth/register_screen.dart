@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../home/home_screen.dart';
+import 'login_screen.dart';
 import '../../database/db_helper.dart';
 import '../../models/user.dart';
 
@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(
-      builder: (context) => HomeScreen(),
+      builder: (context) => LoginScreen(),
     ),
   );
 }
@@ -195,13 +195,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
               SizedBox(height: 30),
 
               SizedBox(
-                width: double.infinity,
+  width: double.infinity,
 
-                child: ElevatedButton(
-                onPressed: doRegister,
-                child: Text("Daftar"),
-                )
-                ),
+  child: ElevatedButton(
+    onPressed: doRegister,
+    child: Text("Daftar"),
+  ),
+),
+
+const SizedBox(height: 20),
+
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+
+  children: [
+
+    const Text("Sudah punya akun?"),
+
+    TextButton(
+      onPressed: () {
+
+        Navigator.pop(context);
+      },
+
+      child: const Text("Login"),
+    ),
+  ],
+),
             ],
           ),
         ),

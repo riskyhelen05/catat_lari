@@ -12,109 +12,202 @@ class DetailRunScreen extends StatelessWidget {
     required this.run,
   });
 
+  Widget buildInfoCard({
+
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String value,
+  }) {
+
+    return Card(
+
+      elevation: 3,
+
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+
+      child: Padding(
+
+        padding: const EdgeInsets.all(18),
+
+        child: Row(
+
+          children: [
+
+            Container(
+
+              padding: const EdgeInsets.all(14),
+
+              decoration: BoxDecoration(
+
+                color: color.withOpacity(0.15),
+
+                borderRadius:
+                    BorderRadius.circular(16),
+              ),
+
+              child: Icon(
+                icon,
+                color: color,
+                size: 28,
+              ),
+            ),
+
+            const SizedBox(width: 16),
+
+            Expanded(
+
+              child: Column(
+
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+
+                children: [
+
+                  Text(
+
+                    title,
+
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+
+                    value,
+
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
 
       appBar: AppBar(
-        title: Text("Detail Lari"),
+        title: const Text("Detail Aktivitas"),
+        centerTitle: true,
       ),
 
-      body: Padding(
+      body: SingleChildScrollView(
 
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
 
         child: Column(
 
-          crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
 
-            Card(
+            // HEADER
+            Container(
 
-              elevation: 4,
+              width: double.infinity,
 
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+              padding: const EdgeInsets.all(24),
+
+              decoration: BoxDecoration(
+
+                gradient: const LinearGradient(
+
+                  colors: [
+                    Color(0xFF4CAF50),
+                    Color(0xFF2196F3),
+                  ],
+
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+
+                borderRadius:
+                    BorderRadius.circular(28),
               ),
 
-              child: Padding(
+              child: Column(
 
-                padding: EdgeInsets.all(20),
+                children: [
 
-                child: Column(
+                  const Icon(
+                    Icons.directions_run,
+                    color: Colors.white,
+                    size: 70,
+                  ),
 
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  const SizedBox(height: 16),
 
-                  children: [
+                  const Text(
 
-                    Text(
-                      "📅 Tanggal",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    "Running Activity",
+
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
 
-                    SizedBox(height: 6),
+                  const SizedBox(height: 8),
 
-                    Text(
-                      run['date']
-                          .toString()
-                          .split(' ')[0],
+                  Text(
+
+                    run['date']
+                        .toString()
+                        .split(' ')[0],
+
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 15,
                     ),
-
-                    SizedBox(height: 20),
-
-                    Text(
-                      "🏃 Jarak",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    SizedBox(height: 6),
-
-                    Text("${run['distance']} km"),
-
-                    SizedBox(height: 20),
-
-                    Text(
-                      "⏱ Durasi",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    SizedBox(height: 6),
-
-                    Text("${run['duration']}"),
-
-                    SizedBox(height: 20),
-
-                    Text(
-                      "📝 Catatan",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    SizedBox(height: 6),
-
-                    Text(
-                      run['note'] == null ||
-                              run['note'] == ""
-                          ? "-"
-                          : run['note'],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
 
+            // INFO
+            buildInfoCard(
+              icon: Icons.route,
+              color: Colors.green,
+              title: "Jarak",
+              value: "${run['distance']} km",
+            ),
+
+            buildInfoCard(
+              icon: Icons.timer,
+              color: Colors.orange,
+              title: "Durasi",
+              value: formatDuration(run['duration']),
+            ),
+
+            buildInfoCard(
+              icon: Icons.notes,
+              color: Colors.blue,
+              title: "Catatan",
+              value: run['note'] == null ||
+                      run['note'] == ""
+                  ? "-"
+                  : run['note'],
+            ),
+
+            const SizedBox(height: 30),
+
+            // BUTTON
             Row(
 
               children: [
@@ -123,60 +216,159 @@ class DetailRunScreen extends StatelessWidget {
 
                   child: ElevatedButton.icon(
 
-                    onPressed: () {
+                    style:
+                        ElevatedButton.styleFrom(
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              EditRunScreen(run: run),
-                        ),
-                      );
-                    },
+                      padding:
+                          const EdgeInsets.symmetric(
+                        vertical: 16,
+                      ),
 
-                    icon: Icon(Icons.edit),
+                      shape:
+                          RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                                18),
+                      ),
+                    ),
 
-                    label: Text("Edit"),
+                    onPressed: () async {
+
+  await Navigator.push(
+
+    context,
+
+    MaterialPageRoute(
+
+      builder: (_) =>
+          EditRunScreen(
+        run: run,
+      ),
+    ),
+  );
+
+  Navigator.pop(context, true);
+},
+
+                    icon: const Icon(Icons.edit),
+
+                    label: const Text("Edit"),
                   ),
                 ),
 
-                SizedBox(width: 12),
+                const SizedBox(width: 14),
 
                 Expanded(
 
                   child: ElevatedButton.icon(
 
-                    style: ElevatedButton.styleFrom(
+                    style:
+                        ElevatedButton.styleFrom(
+
                       backgroundColor: Colors.red,
+
+                      padding:
+                          const EdgeInsets.symmetric(
+                        vertical: 16,
+                      ),
+
+                      shape:
+                          RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                                18),
+                      ),
                     ),
 
                     onPressed: () async {
 
-                      final db =
-                          await DBHelper().database;
+                      final confirm =
+                          await showDialog(
 
-                      await db.delete(
-                        'runs',
-                        where: 'id = ?',
-                        whereArgs: [run['id']],
-                      );
+                        context: context,
 
-                      Navigator.pop(context);
+                        builder: (_) =>
+                            AlertDialog(
 
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(
+                          title:
+                              const Text("Hapus Data"),
 
-                        SnackBar(
-                          content: Text(
-                            "Data berhasil dihapus",
+                          content: const Text(
+                            "Yakin ingin menghapus aktivitas ini?",
                           ),
+
+                          actions: [
+
+                            TextButton(
+
+                              onPressed: () {
+                                Navigator.pop(
+                                    context,
+                                    false);
+                              },
+
+                              child:
+                                  const Text("Batal"),
+                            ),
+
+                            TextButton(
+
+                              onPressed: () {
+                                Navigator.pop(
+                                    context,
+                                    true);
+                              },
+
+                              child: const Text(
+
+                                "Hapus",
+
+                                style: TextStyle(
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       );
+
+                      if (confirm == true) {
+
+                        final db =
+                            await DBHelper()
+                                .database;
+
+                        await db.delete(
+
+                          'runs',
+
+                          where: 'id = ?',
+
+                          whereArgs: [
+                            run['id']
+                          ],
+                        );
+
+                        Navigator.pop(context);
+
+                        ScaffoldMessenger.of(
+                                context)
+                            .showSnackBar(
+
+                          const SnackBar(
+                            content: Text(
+                              "Data berhasil dihapus",
+                            ),
+                          ),
+                        );
+                      }
                     },
 
-                    icon: Icon(Icons.delete),
+                    icon:
+                        const Icon(Icons.delete),
 
-                    label: Text("Hapus"),
+                    label:
+                        const Text("Hapus"),
                   ),
                 ),
               ],
@@ -186,4 +378,21 @@ class DetailRunScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+String formatDuration(dynamic value) {
+
+  final totalMinute =
+      int.tryParse(value.toString()) ?? 0;
+
+  final hour = totalMinute ~/ 60;
+
+  final minute = totalMinute % 60;
+
+  if (hour == 0) {
+
+    return "$minute menit";
+  }
+
+  return "$hour jam $minute menit";
 }

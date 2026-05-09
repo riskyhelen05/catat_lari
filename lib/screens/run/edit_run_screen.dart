@@ -2,123 +2,293 @@ import 'package:flutter/material.dart';
 import '../../database/db_helper.dart';
 
 class EditRunScreen extends StatefulWidget {
+
   final Map<String, dynamic> run;
 
-  EditRunScreen({required this.run});
+  const EditRunScreen({
+    super.key,
+    required this.run,
+  });
 
   @override
-  State<EditRunScreen> createState() => _EditRunScreenState();
+  State<EditRunScreen> createState() =>
+      _EditRunScreenState();
 }
 
-class _EditRunScreenState extends State<EditRunScreen> {
+class _EditRunScreenState
+    extends State<EditRunScreen> {
+
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController distanceController;
+  late TextEditingController durationController;
   late TextEditingController noteController;
 
-  TimeOfDay selectedTime = TimeOfDay.now();
   DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
+
     super.initState();
 
-    distanceController =
-        TextEditingController(text: widget.run['distance'].toString());
-
-    noteController =
-        TextEditingController(text: widget.run['note'] ?? "");
-
-    selectedDate = DateTime.parse(widget.run['date']);
-
-    // parse "13:05"
-    final timeParts = widget.run['duration'].split(":");
-    selectedTime = TimeOfDay(
-      hour: int.parse(timeParts[0]),
-      minute: int.parse(timeParts[1]),
+    distanceController = TextEditingController(
+      text: widget.run['distance'].toString(),
     );
+
+    durationController = TextEditingController(
+      text: widget.run['duration'].toString(),
+    );
+
+    noteController = TextEditingController(
+      text: widget.run['note'] ?? "",
+    );
+
+    selectedDate =
+        DateTime.parse(widget.run['date']);
   }
 
-  String formatTime(TimeOfDay time) {
-    return "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+  Future<void> pickDate() async {
+
+    final picked = await showDatePicker(
+
+      context: context,
+
+      initialDate: selectedDate,
+
+      firstDate: DateTime(2020),
+
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+
+      setState(() {
+        selectedDate = picked;
+      });
+    }
   }
 
   void updateRun() async {
-    if (!_formKey.currentState!.validate()) return;
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final db = DBHelper();
 
-    await db.updateRun(widget.run['id'], {
-      'distance': double.parse(distanceController.text),
-      'duration': formatTime(selectedTime),
-      'note': noteController.text,
-      'date': selectedDate.toString(),
-    });
+    await db.updateRun(
+
+      widget.run['id'],
+
+      {
+        'distance':
+            double.parse(distanceController.text),
+
+        'duration':
+            int.parse(durationController.text),
+
+        'note': noteController.text,
+
+        'date': selectedDate.toString(),
+      },
+    );
 
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      appBar: AppBar(title: Text("Edit Lari")),
-      body: Padding(
-        padding: EdgeInsets.all(16),
+
+      appBar: AppBar(
+        title: const Text("Edit Aktivitas"),
+        centerTitle: true,
+      ),
+
+      body: SingleChildScrollView(
+
+        padding: const EdgeInsets.all(20),
+
         child: Form(
+
           key: _formKey,
+
           child: Column(
+
             children: [
 
+              // DISTANCE
               TextFormField(
+
                 controller: distanceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: "Jarak"),
-                validator: (v) =>
-                    v == null || v.isEmpty ? "Wajib isi" : null,
-              ),
 
-              SizedBox(height: 10),
+                keyboardType:
+                    TextInputType.number,
 
-              Text("Durasi: ${formatTime(selectedTime)}"),
-              ElevatedButton(
-                onPressed: () async {
-                  final picked = await showTimePicker(
-                    context: context,
-                    initialTime: selectedTime,
-                  );
-                  if (picked != null) setState(() => selectedTime = picked);
+                decoration: InputDecoration(
+
+                  labelText: "Jarak (km)",
+
+                  prefixIcon:
+                      const Icon(Icons.route),
+
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(18),
+                  ),
+                ),
+
+                validator: (value) {
+
+                  if (value == null ||
+                      value.isEmpty) {
+
+                    return "Jarak wajib diisi";
+                  }
+
+                  return null;
                 },
-                child: Text("Pilih Jam"),
               ),
 
-              SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-              Text("Tanggal: ${selectedDate.toLocal().toString().split(' ')[0]}"),
-              ElevatedButton(
-                onPressed: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime.now(),
-                  );
-                  if (picked != null) setState(() => selectedDate = picked);
-                },
-                child: Text("Pilih Tanggal"),
-              ),
-
-              SizedBox(height: 10),
-
+              // DURATION
               TextFormField(
-                controller: noteController,
-                decoration: InputDecoration(labelText: "Catatan"),
+
+                controller: durationController,
+
+                keyboardType:
+                    TextInputType.number,
+
+                decoration: InputDecoration(
+
+                  labelText: "Durasi (menit)",
+
+                  hintText: "Contoh: 45",
+
+                  prefixIcon:
+                      const Icon(Icons.timer),
+
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(18),
+                  ),
+                ),
+
+                validator: (value) {
+
+                  if (value == null ||
+                      value.isEmpty) {
+
+                    return "Durasi wajib diisi";
+                  }
+
+                  return null;
+                },
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              ElevatedButton(
-                onPressed: updateRun,
-                child: Text("Update"),
+              // DATE
+              Card(
+
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(20),
+                ),
+
+                child: ListTile(
+
+                  leading: const Icon(
+                    Icons.calendar_month,
+                    color: Colors.green,
+                  ),
+
+                  title: const Text("Tanggal"),
+
+                  subtitle: Text(
+                    selectedDate
+                        .toLocal()
+                        .toString()
+                        .split(' ')[0],
+
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  trailing: ElevatedButton(
+                    onPressed: pickDate,
+                    child: const Text("Pilih"),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // NOTE
+              TextFormField(
+
+                controller: noteController,
+
+                maxLines: 4,
+
+                decoration: InputDecoration(
+
+                  labelText: "Catatan",
+
+                  alignLabelWithHint: true,
+
+                  prefixIcon:
+                      const Padding(
+                    padding:
+                        EdgeInsets.only(bottom: 70),
+                    child: Icon(Icons.notes),
+                  ),
+
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(18),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // BUTTON
+              SizedBox(
+
+                width: double.infinity,
+
+                child: ElevatedButton.icon(
+
+                  style:
+                      ElevatedButton.styleFrom(
+
+                    padding:
+                        const EdgeInsets.symmetric(
+                      vertical: 16,
+                    ),
+
+                    shape:
+                        RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(18),
+                    ),
+                  ),
+
+                  onPressed: updateRun,
+
+                  icon: const Icon(Icons.save),
+
+                  label: const Text(
+                    "Update Aktivitas",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

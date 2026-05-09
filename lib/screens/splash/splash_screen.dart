@@ -2,30 +2,64 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../welcome/welcome_screen.dart';
+import '../auth/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
+
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() =>
+      _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState
+    extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+
+  late AnimationController controller;
+
+  late Animation<double> fadeAnimation;
 
   @override
   void initState() {
+
     super.initState();
 
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+
+    fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(controller);
+
+    controller.forward();
+
     Timer(
-      Duration(seconds: 3),
-          () {
+
+      const Duration(seconds: 3),
+
+      () {
+
         Navigator.pushReplacement(
+
           context,
+
           MaterialPageRoute(
-            builder: (context) => WelcomeScreen(),
+            builder: (_) => LoginScreen(),
           ),
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+
+    controller.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -34,13 +68,16 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
 
       body: Container(
+
         width: double.infinity,
 
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
+
           gradient: LinearGradient(
+
             colors: [
-              Colors.blue,
-              Colors.cyan,
+              Color(0xFF4CAF50),
+              Color(0xFF2196F3),
             ],
 
             begin: Alignment.topLeft,
@@ -48,39 +85,76 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ),
 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: FadeTransition(
 
-          children: [
+          opacity: fadeAnimation,
 
-            Icon(
-              Icons.directions_run,
-              size: 120,
-              color: Colors.white,
-            ),
+          child: Column(
 
-            SizedBox(height: 20),
+            mainAxisAlignment:
+                MainAxisAlignment.center,
 
-            Text(
-              "CATAT LARI",
-              style: TextStyle(
-                fontSize: 34,
-                fontWeight: FontWeight.bold,
+            children: [
+
+              Container(
+
+                padding: const EdgeInsets.all(28),
+
+                decoration: BoxDecoration(
+
+                  color: Colors.white,
+
+                  shape: BoxShape.circle,
+
+                  boxShadow: [
+
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 20,
+                      offset: Offset(0, 10),
+                    ),
+                  ],
+                ),
+
+                child: const Icon(
+                  Icons.directions_run,
+                  size: 90,
+                  color: Color(0xFF4CAF50),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              const Text(
+
+                "Catat Lari",
+
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 34,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              const Text(
+
+                "Healthy Lifestyle Tracker",
+
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
+              ),
+
+              const SizedBox(height: 50),
+
+              const CircularProgressIndicator(
                 color: Colors.white,
-                letterSpacing: 2,
               ),
-            ),
-
-            SizedBox(height: 10),
-
-            Text(
-              "Track Your Run Everyday",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white70,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
