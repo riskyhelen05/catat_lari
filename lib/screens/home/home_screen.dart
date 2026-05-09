@@ -154,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
 
                             Text(
-                              "${stats['totalDistance'] ?? 0} km",
+                              "${(stats['totalDistance'] ?? 0).toString()} km",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 24,
@@ -197,8 +197,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     if (data.isEmpty) {
                       return Center(
-                        child: Text("Belum ada data lari"),
-                      );
+
+  child: Column(
+
+    mainAxisAlignment: MainAxisAlignment.center,
+
+    children: [
+
+      Icon(
+        Icons.directions_run,
+        size: 80,
+        color: Colors.grey,
+      ),
+
+      SizedBox(height: 12),
+
+      Text(
+        "Belum ada data lari",
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+
+      SizedBox(height: 6),
+
+      Text(
+        "Yuk mulai catat aktivitas larimu 🚀",
+        style: TextStyle(
+          color: Colors.grey,
+        ),
+      ),
+    ],
+  ),
+);
                     }
 
                     return ListView.builder(
