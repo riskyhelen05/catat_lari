@@ -12,7 +12,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
+  // 🔥 AMBIL DATA LARI
   Future<List<Map<String, dynamic>>> getRuns() async {
+
     final db = await DBHelper().database;
 
     return await db.query(
@@ -23,254 +25,427 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void logout(BuildContext context) {
-    Session.clear();
-    Navigator.pushReplacementNamed(context, '/');
+  // 🔥 STATISTIK
+  Future<Map<String, dynamic>> getStatistics() async {
+
+    final db = await DBHelper().database;
+
+    final result = await db.rawQuery('''
+      SELECT 
+        COUNT(*) as totalRun,
+        SUM(distance) as totalDistance
+      FROM runs
+      WHERE userId = ?
+    ''', [Session.userId]);
+
+    return result.first;
   }
 
-  // 🔥 DELETE CONFIRMATION
-  void confirmDelete(int id) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Hapus Data"),
-        content: Text("Yakin mau hapus data ini?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Batal"),
-          ),
-          TextButton(
-            onPressed: () async {
-              final db = DBHelper();
-              await db.deleteRun(id);
+  // 🔥 LOGOUT
+  void logout(BuildContext context) {
 
-              Navigator.pop(context);
-              setState(() {});
-            },
-            child: Text(
-              "Hapus",
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
+    Session.clear();
+
+    Navigator.pushReplacementNamed(context, '/');
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+
       appBar: AppBar(
+
         title: Text("Catat Lari"),
+
         actions: [
+
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () => logout(context),
-          )
+          ),
+
         ],
       ),
 
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: getRuns(),
-        builder: (context, snapshot) {
+      body: FutureBuilder<Map<String, dynamic>>(
 
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
+        future: getStatistics(),
 
-          final data = snapshot.data!;
+        builder: (context, statSnapshot) {
 
-          if (data.isEmpty) {
+          if (!statSnapshot.hasData) {
             return Center(
-              child: Text("Belum ada data lari"),
+              child: CircularProgressIndicator(),
             );
           }
 
-          return ListView.builder(
-            itemCount: data.length,
-            itemBuilder: (context, index) {
-              final run = data[index];
+          final stats = statSnapshot.data!;
 
-              return Dismissible(
-  key: Key(run['id'].toString()),
+          return Column(
 
-  direction: DismissDirection.endToStart,
+            children: [
 
-  background: Container(
-    margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-    padding: EdgeInsets.only(right: 20),
+              // 🔥 DASHBOARD
+              Container(
 
-    decoration: BoxDecoration(
-      color: Colors.red,
-      borderRadius: BorderRadius.circular(12),
-    ),
+                margin: EdgeInsets.all(16),
 
-    alignment: Alignment.centerRight,
+                child: Row(
 
-    child: Icon(
-      Icons.delete,
-      color: Colors.white,
-      size: 30,
-    ),
-  ),
+                  children: [
 
-  confirmDismiss: (direction) async {
+                    // TOTAL RUN
+                    Expanded(
 
-    return await showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Hapus Data"),
-        content: Text("Yakin ingin menghapus data lari ini?"),
+                      child: Container(
 
-        actions: [
+                        padding: EdgeInsets.all(16),
 
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, false);
-            },
-            child: Text("Batal"),
-          ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius:
+                              BorderRadius.circular(16),
+                        ),
 
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, true);
-            },
-            child: Text(
-              "Hapus",
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
+                        child: Column(
 
-        ],
-      ),
-    );
-  },
+                          children: [
 
-  onDismissed: (direction) async {
+                            Text(
+                              "${stats['totalRun'] ?? 0}",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
 
-    final deletedRun = Map<String, dynamic>.from(run);
+                            SizedBox(height: 4),
 
-    final db = await DBHelper().database;
+                            Text(
+                              "Total Run",
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
-    await db.delete(
-      'runs',
-      where: 'id = ?',
-      whereArgs: [run['id']],
-    );
+                    SizedBox(width: 12),
 
-    ScaffoldMessenger.of(context).showSnackBar(
+                    // TOTAL DISTANCE
+                    Expanded(
 
-      SnackBar(
+                      child: Container(
 
-        content: Text("Data berhasil dihapus"),
+                        padding: EdgeInsets.all(16),
 
-        action: SnackBarAction(
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius:
+                              BorderRadius.circular(16),
+                        ),
 
-          label: "UNDO",
+                        child: Column(
 
-          onPressed: () async {
+                          children: [
 
-            await db.insert(
-              'runs',
-              deletedRun,
-            );
+                            Text(
+                              "${stats['totalDistance'] ?? 0} km",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
 
-            setState(() {});
-          },
-        ),
+                            SizedBox(height: 4),
 
-        duration: Duration(seconds: 3),
-      ),
-    );
-
-    setState(() {});
-  },
-
-  child: Card(
-
-    elevation: 3,
-
-    margin: EdgeInsets.symmetric(
-      horizontal: 12,
-      vertical: 6,
-    ),
-
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-
-    child: InkWell(
-
-      borderRadius: BorderRadius.circular(12),
-
-      onTap: () {
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => EditRunScreen(run: run),
-          ),
-        ).then((_) => setState(() {}));
-      },
-
-      child: Padding(
-
-        padding: EdgeInsets.all(14),
-
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-
-          children: [
-
-            Text(
-              "📅 ${run['date'].toString().split(' ')[0]}",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-            ),
-
-            SizedBox(height: 8),
-
-            Text(
-              "🏃 ${run['distance']} km",
-              style: TextStyle(fontSize: 16),
-            ),
-
-            SizedBox(height: 4),
-
-            Text(
-              "⏱ ${run['duration']}",
-              style: TextStyle(fontSize: 16),
-            ),
-
-            if (run['note'] != null &&
-                run['note'] != "")
-              Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Text(
-                  "📝 ${run['note']}",
+                            Text(
+                              "Total Distance",
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-          ],
-        ),
-      ),
-    ),
-  ),
-);
-            },
+
+              // 🔥 LIST DATA
+              Expanded(
+
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+
+                  future: getRuns(),
+
+                  builder: (context, snapshot) {
+
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    final data = snapshot.data!;
+
+                    if (data.isEmpty) {
+                      return Center(
+                        child: Text("Belum ada data lari"),
+                      );
+                    }
+
+                    return ListView.builder(
+
+                      itemCount: data.length,
+
+                      itemBuilder: (context, index) {
+
+                        final run = data[index];
+
+                        return Dismissible(
+
+                          key: Key(run['id'].toString()),
+
+                          direction:
+                              DismissDirection.endToStart,
+
+                          background: Container(
+
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+
+                            padding: EdgeInsets.only(
+                              right: 20,
+                            ),
+
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius:
+                                  BorderRadius.circular(12),
+                            ),
+
+                            alignment: Alignment.centerRight,
+
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                          ),
+
+                          // 🔥 KONFIRMASI DELETE
+                          confirmDismiss: (direction) async {
+
+                            return await showDialog(
+
+                              context: context,
+
+                              builder: (_) => AlertDialog(
+
+                                title: Text("Hapus Data"),
+
+                                content: Text(
+                                  "Yakin ingin menghapus data ini?",
+                                ),
+
+                                actions: [
+
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(
+                                          context, false);
+                                    },
+                                    child: Text("Batal"),
+                                  ),
+
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(
+                                          context, true);
+                                    },
+                                    child: Text(
+                                      "Hapus",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+
+                          // 🔥 DELETE + UNDO
+                          onDismissed: (direction) async {
+
+                            final deletedRun =
+                                Map<String, dynamic>.from(run);
+
+                            final db =
+                                await DBHelper().database;
+
+                            await db.delete(
+                              'runs',
+                              where: 'id = ?',
+                              whereArgs: [run['id']],
+                            );
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(
+
+                              SnackBar(
+
+                                content: Text(
+                                  "Data berhasil dihapus",
+                                ),
+
+                                action: SnackBarAction(
+
+                                  label: "UNDO",
+
+                                  onPressed: () async {
+
+                                    await db.insert(
+                                      'runs',
+                                      deletedRun,
+                                    );
+
+                                    setState(() {});
+                                  },
+                                ),
+                              ),
+                            );
+
+                            setState(() {});
+                          },
+
+                          // 🔥 CARD
+                          child: Card(
+
+                            elevation: 3,
+
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(12),
+                            ),
+
+                            child: InkWell(
+
+                              borderRadius:
+                                  BorderRadius.circular(12),
+
+                              // 🔥 EDIT
+                              onTap: () {
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        EditRunScreen(
+                                      run: run,
+                                    ),
+                                  ),
+                                ).then(
+                                  (_) => setState(() {}),
+                                );
+                              },
+
+                              child: Padding(
+
+                                padding: EdgeInsets.all(14),
+
+                                child: Column(
+
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment
+                                          .start,
+
+                                  children: [
+
+                                    Text(
+                                      "📅 ${run['date'].toString().split(' ')[0]}",
+                                      style: TextStyle(
+                                        fontWeight:
+                                            FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 8),
+
+                                    Text(
+                                      "🏃 ${run['distance']} km",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 4),
+
+                                    Text(
+                                      "⏱ ${run['duration']}",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+
+                                    if (run['note'] != null &&
+                                        run['note'] != "")
+
+                                      Padding(
+
+                                        padding:
+                                            EdgeInsets.only(
+                                          top: 6,
+                                        ),
+
+                                        child: Text(
+                                          "📝 ${run['note']}",
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),
 
+      // 🔥 TAMBAH DATA
       floatingActionButton: FloatingActionButton(
+
         onPressed: () {
+
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => AddRunScreen()),
+            MaterialPageRoute(
+              builder: (_) => AddRunScreen(),
+            ),
           ).then((_) => setState(() {}));
         },
+
         child: Icon(Icons.add),
       ),
     );
