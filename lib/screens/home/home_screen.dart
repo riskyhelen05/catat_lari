@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-
 import '../../database/db_helper.dart';
 import '../../database/session.dart';
 import '../run/add_run_screen.dart';
 import '../run/edit_run_screen.dart';
 import '../run/detail_run_screen.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -60,6 +60,27 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text("Catat Lari"),
 
         actions: [
+
+  IconButton(
+
+    icon: Icon(Icons.person),
+
+    onPressed: () {
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProfileScreen(),
+        ),
+      );
+    },
+  ),
+
+  IconButton(
+    icon: Icon(Icons.logout),
+    onPressed: () => logout(context),
+  ),
+],
 
           IconButton(
             icon: Icon(Icons.logout),
