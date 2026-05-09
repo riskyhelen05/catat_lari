@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../database/db_helper.dart';
 import '../../database/session.dart';
+import '../run/add_run_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -10,15 +12,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  Future<List<Map<String, dynamic>>> getRuns() async {
-    final db = await DBHelper().database;
+Future<List<Map<String, dynamic>>> getRuns() async {
+  final db = await DBHelper().database;
 
-    return await db.query(
-      'runs',
-      where: 'userId = ?',
-      whereArgs: [Session.userId],
-    );
-  }
+  return await db.query(
+    'runs',
+    where: 'userId = ?',
+    whereArgs: [Session.userId],
+    orderBy: 'id DESC',
+  );
+}
 
   void logout(BuildContext context) {
     Session.clear();
@@ -60,16 +63,45 @@ class _HomeScreenState extends State<HomeScreen> {
               final run = data[index];
 
               return Card(
-                child: ListTile(
-                  title: Text("Distance: ${run['distance']} km"),
-                  subtitle: Text("Duration: ${run['duration']} menit"),
-                  trailing: Text(run['date'].toString()),
+                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+
+                Text(
+                  "📅 ${run['date'].toString().split(' ')[0]}",
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-              );
+
+                SizedBox(height: 6),
+
+                Text("🏃 ${run['distance']} km"),
+
+                Text("⏱ ${run['duration']}"),
+
+                  if (run['note'] != null && run['note'] != "")
+                Text("📝 ${run['note']}"),
+
+                  ],
+                ),
+              ),
+            );
             },
           );
         },
       ),
+
+      floatingActionButton: FloatingActionButton(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => AddRunScreen()),
+    ).then((_) => setState(() {}));
+  },
+  child: Icon(Icons.add),
+),
     );
   }
 }
