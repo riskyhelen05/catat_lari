@@ -85,4 +85,13 @@ class DBHelper {
     whereArgs: [id],
   );
 }
+
+Future<int> deleteRun(int id) async {
+  final db = await database;
+  return await db.delete(
+    'runs',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
 }

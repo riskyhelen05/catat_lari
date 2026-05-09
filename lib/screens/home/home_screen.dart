@@ -5,7 +5,6 @@ import '../../database/session.dart';
 import '../run/add_run_screen.dart';
 import '../run/edit_run_screen.dart';
 
-
 class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -13,20 +12,50 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-Future<List<Map<String, dynamic>>> getRuns() async {
-  final db = await DBHelper().database;
+  Future<List<Map<String, dynamic>>> getRuns() async {
+    final db = await DBHelper().database;
 
-  return await db.query(
-    'runs',
-    where: 'userId = ?',
-    whereArgs: [Session.userId],
-    orderBy: 'id DESC',
-  );
-}
+    return await db.query(
+      'runs',
+      where: 'userId = ?',
+      whereArgs: [Session.userId],
+      orderBy: 'id DESC',
+    );
+  }
 
   void logout(BuildContext context) {
     Session.clear();
     Navigator.pushReplacementNamed(context, '/');
+  }
+
+  // 🔥 DELETE CONFIRMATION
+  void confirmDelete(int id) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Hapus Data"),
+        content: Text("Yakin mau hapus data ini?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () async {
+              final db = DBHelper();
+              await db.deleteRun(id);
+
+              Navigator.pop(context);
+              setState(() {});
+            },
+            child: Text(
+              "Hapus",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -64,55 +93,62 @@ Future<List<Map<String, dynamic>>> getRuns() async {
               final run = data[index];
 
               return Card(
-  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-  child: InkWell( // 🔥 TAMBAHKAN INI
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => EditRunScreen(run: run),
-        ),
-      ).then((_) => setState(() {}));
-    },
-    child: Padding(
-      padding: EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: InkWell(
+                  // 🔥 TAP = EDIT
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditRunScreen(run: run),
+                      ),
+                    ).then((_) => setState(() {}));
+                  },
 
-          Text(
-            "📅 ${run['date'].toString().split(' ')[0]}",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+                  // 🔥 LONG PRESS = DELETE
+                  onLongPress: () {
+                    confirmDelete(run['id']);
+                  },
 
-          SizedBox(height: 6),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
 
-          Text("🏃 ${run['distance']} km"),
+                        Text(
+                          "📅 ${run['date'].toString().split(' ')[0]}",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
 
-          Text("⏱ ${run['duration']}"),
+                        SizedBox(height: 6),
 
-          if (run['note'] != null && run['note'] != "")
-            Text("📝 ${run['note']}"),
+                        Text("🏃 ${run['distance']} km"),
 
-        ],
-      ),
-    ),
-  ),
-);
+                        Text("⏱ ${run['duration']}"),
+
+                        if (run['note'] != null && run['note'] != "")
+                          Text("📝 ${run['note']}"),
+
+                      ],
+                    ),
+                  ),
+                ),
+              );
             },
           );
         },
       ),
 
       floatingActionButton: FloatingActionButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => AddRunScreen()),
-    ).then((_) => setState(() {}));
-  },
-  child: Icon(Icons.add),
-),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddRunScreen()),
+          ).then((_) => setState(() {}));
+        },
+        child: Icon(Icons.add),
+      ),
     );
   }
 }
