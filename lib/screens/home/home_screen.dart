@@ -4,6 +4,7 @@ import '../../database/db_helper.dart';
 import '../../database/session.dart';
 import '../run/add_run_screen.dart';
 import '../run/edit_run_screen.dart';
+import '../run/detail_run_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -386,8 +387,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        EditRunScreen(
+                                    builder: (_) => DetailRunScreen(
                                       run: run,
                                     ),
                                   ),
