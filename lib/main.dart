@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/splash/splash_screen.dart';
-import 'screens/home/home_screen.dart';
-import 'screens/navigation/main_navigation.dart';
+import 'screens/navigation/bottom_nav_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,7 +18,7 @@ class MyApp extends StatelessWidget {
 
       routes: {
         '/': (context) => SplashScreen(),
-        '/home': (context) => MainNavigation(),
+        '/home': (context) => BottomNavScreen(),
       },
     );
   }
