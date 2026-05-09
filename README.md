@@ -14,7 +14,6 @@ Aplikasi mobile Flutter untuk mencatat aktivitas lari harian dengan tampilan mod
 - ➕ Add Run (Tambah data lari)
 - 📋 Detail Run
 - ✏️ Edit Run
-- 🗑 Swipe Delete + Undo Snackbar
 - 📊 Statistik & Grafik aktivitas
 - 👤 Profile User
 - 🚪 Logout
@@ -109,10 +108,6 @@ Menampilkan detail aktivitas lari.
 ## ✏️ Edit Run
 Mengubah data aktivitas lari.
 
-## 🗑 Swipe Delete
-- Hapus data dengan swipe gesture
-- Undo menggunakan snackbar
-
 ## 📊 Statistik
 - Grafik aktivitas lari menggunakan fl_chart
 - Analisis progress lari
@@ -123,6 +118,40 @@ Mengubah data aktivitas lari.
 
 ## 🌙 Dark Mode
 UI modern dengan tema gelap.
+
+---
+
+## 📸 Screenshot Aplikasi
+
+### 👋 Splash Screen
+![Splash](assets/screenshot/splash_screen.png)
+
+### 🔐 Login Screen
+![Login](assets/screenshot/login_screen.png)
+
+### 📝 Register Screen
+![Register](assets/screenshot/register_screen.png)
+
+### 🏠 Home Screen Light
+![Home Light](assets/screenshot/home_screen_light.png)
+
+### 🌙 Home Screen Dark
+![Home Dark](assets/screenshot/home_screen_dark.png)
+
+### ➕ Add Run
+![Add Run](assets/screenshot/add_run.png)
+
+### 📋 Detail Run
+![Detail Run](assets/screenshot/detail_run.png)
+
+### ✏️ Edit Run
+![Edit Run](assets/screenshot/edit_run.png)
+
+### 📊 Statistic Screen
+![Statistic](assets/screenshot/statistic_screen.png)
+
+### 👤 Profile Screen
+![Profile](assets/screenshot/profile_screen.png)
 
 ---
 
