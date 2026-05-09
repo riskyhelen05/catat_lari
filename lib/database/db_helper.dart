@@ -75,4 +75,14 @@ class DBHelper {
     final db = await database;
     return await db.insert('runs', data);
   }
+
+  Future<int> updateRun(int id, Map<String, dynamic> data) async {
+  final db = await database;
+  return await db.update(
+    'runs',
+    data,
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
 }

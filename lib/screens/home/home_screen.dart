@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../database/db_helper.dart';
 import '../../database/session.dart';
 import '../run/add_run_screen.dart';
+import '../run/edit_run_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -63,31 +64,41 @@ Future<List<Map<String, dynamic>>> getRuns() async {
               final run = data[index];
 
               return Card(
-                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  child: InkWell( // 🔥 TAMBAHKAN INI
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EditRunScreen(run: run),
+        ),
+      ).then((_) => setState(() {}));
+    },
+    child: Padding(
+      padding: EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
 
-                Text(
-                  "📅 ${run['date'].toString().split(' ')[0]}",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+          Text(
+            "📅 ${run['date'].toString().split(' ')[0]}",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
 
-                SizedBox(height: 6),
+          SizedBox(height: 6),
 
-                Text("🏃 ${run['distance']} km"),
+          Text("🏃 ${run['distance']} km"),
 
-                Text("⏱ ${run['duration']}"),
+          Text("⏱ ${run['duration']}"),
 
-                  if (run['note'] != null && run['note'] != "")
-                Text("📝 ${run['note']}"),
+          if (run['note'] != null && run['note'] != "")
+            Text("📝 ${run['note']}"),
 
-                  ],
-                ),
-              ),
-            );
+        ],
+      ),
+    ),
+  ),
+);
             },
           );
         },
