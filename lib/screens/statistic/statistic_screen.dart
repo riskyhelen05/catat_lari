@@ -431,8 +431,21 @@ class _StatisticScreenState
                         minY: 0,
 
                         gridData: FlGridData(
-                          show: true,
-                        ),
+
+  show: true,
+
+  getDrawingHorizontalLine: (value) {
+
+    return FlLine(
+
+      color: isDark
+          ? Colors.white12
+          : Colors.black12,
+
+      strokeWidth: 1,
+    );
+  },
+),
 
                         borderData:
                             FlBorderData(show: false),
@@ -455,14 +468,30 @@ class _StatisticScreenState
 
                           leftTitles: AxisTitles(
 
-                            sideTitles:
-                                SideTitles(
+  sideTitles: SideTitles(
 
-                              showTitles: true,
+    showTitles: true,
 
-                              reservedSize: 40,
-                            ),
-                          ),
+    reservedSize: 40,
+
+    getTitlesWidget: (value, meta) {
+
+      return Text(
+
+        value.toInt().toString(),
+
+        style: TextStyle(
+
+          fontSize: 12,
+
+          color: isDark
+              ? Colors.white70
+              : Colors.black87,
+        ),
+      );
+    },
+  ),
+),
 
                           bottomTitles: AxisTitles(
 
