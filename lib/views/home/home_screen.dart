@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../database/db_helper.dart';
 import '../../database/session.dart';
+
+import '../../viewmodels/run_viewmodel.dart';
 
 import '../run/add_run_screen.dart';
 import '../run/detail_run_screen.dart';
@@ -18,31 +20,18 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState
     extends State<HomeScreen> {
 
-  Future<List<Map<String, dynamic>>> getRuns() async {
+  @override
+  void initState() {
 
-    final db = await DBHelper().database;
+    super.initState();
 
-    return await db.query(
-      'runs',
-      where: 'userId = ?',
-      whereArgs: [Session.userId],
-      orderBy: 'id DESC',
-    );
-  }
+    Future.microtask(() {
 
-  Future<Map<String, dynamic>> getStatistics() async {
-
-    final db = await DBHelper().database;
-
-    final result = await db.rawQuery('''
-      SELECT
-      COUNT(*) as totalRun,
-      SUM(distance) as totalDistance
-      FROM runs
-      WHERE userId = ?
-    ''', [Session.userId]);
-
-    return result.first;
+      Provider.of<RunViewModel>(
+        context,
+        listen: false,
+      ).fetchRuns();
+    });
   }
 
   @override
@@ -52,6 +41,20 @@ class _HomeScreenState
         Theme.of(context).brightness ==
             Brightness.dark;
 
+    final runVM =
+        Provider.of<RunViewModel>(context);
+
+    final data = runVM.runs;
+
+    double totalDistance = 0;
+
+    for (var run in data) {
+
+      totalDistance += double.parse(
+        run['distance'].toString(),
+      );
+    }
+
     return Scaffold(
 
       appBar: AppBar(
@@ -59,605 +62,627 @@ class _HomeScreenState
         centerTitle: true,
       ),
 
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: runVM.isLoading
 
-        future: getStatistics(),
+          ? const Center(
+              child:
+                  CircularProgressIndicator(),
+            )
 
-        builder: (context, statSnapshot) {
+          : SingleChildScrollView(
 
-          if (!statSnapshot.hasData) {
+              child: Padding(
 
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+                padding: const EdgeInsets.only(
+                  bottom: 100,
+                ),
 
-          final stats = statSnapshot.data!;
+                child: Column(
 
-          return FutureBuilder<List<Map<String, dynamic>>>(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
 
-            future: getRuns(),
+                  children: [
 
-            builder: (context, snapshot) {
+                    // 🔥 GREETING
+                    Padding(
 
-              if (!snapshot.hasData) {
+                      padding:
+                          const EdgeInsets.all(20),
 
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
+                      child: Row(
 
-              final data = snapshot.data!;
+                        children: [
 
-              return SingleChildScrollView(
+                          CircleAvatar(
 
-                child: Padding(
+                            radius: 30,
 
-                  padding: const EdgeInsets.only(
-                    bottom: 100,
-                  ),
+                            backgroundColor:
+                                Colors.blue,
 
-                  child: Column(
+                            child: Text(
 
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                              Session.username !=
+                                      null
+                                  ? Session
+                                      .username![0]
+                                      .toUpperCase()
+                                  : "U",
 
-                    children: [
-
-                      // 🔥 GREETING
-                      Padding(
-
-                        padding: const EdgeInsets.all(20),
-
-                        child: Row(
-
-                          children: [
-
-                            CircleAvatar(
-
-                              radius: 30,
-
-                              backgroundColor:
-                                  Colors.blue,
-
-                              child: Text(
-
-                                Session.username != null
-                                    ? Session.username![0]
-                                        .toUpperCase()
-                                    : "U",
-
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
+                              style:
+                                  const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
-
-                            const SizedBox(width: 14),
-
-                            Expanded(
-
-                              child: Column(
-
-                                crossAxisAlignment:
-                                    CrossAxisAlignment
-                                        .start,
-
-                                children: [
-
-                                  Text(
-
-                                    "Halo, ${Session.username ?? 'User'} 👋",
-
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight:
-                                          FontWeight.bold,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 4),
-
-                                  const Text(
-
-                                    "Siap untuk lari hari ini?",
-
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // 🔥 DASHBOARD
-                      Container(
-
-                        margin:
-                            const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
-
-                        padding:
-                            const EdgeInsets.all(22),
-
-                        decoration: BoxDecoration(
-
-                          gradient:
-                              const LinearGradient(
-
-                            colors: [
-                              Color(0xFF2196F3),
-                              Color(0xFF4CAF50),
-                            ],
-
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
                           ),
 
-                          borderRadius:
-                              BorderRadius.circular(28),
-
-                          boxShadow: [
-
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 10,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
-                        ),
-
-                        child: Column(
-
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-
-                          children: [
-
-                            Row(
-
-                              children: [
-
-                                Container(
-
-                                  padding:
-                                      const EdgeInsets.all(
-                                    14,
-                                  ),
-
-                                  decoration:
-                                      BoxDecoration(
-
-                                    color: Colors.white
-                                        .withOpacity(0.2),
-
-                                    borderRadius:
-                                        BorderRadius.circular(
-                                      18,
-                                    ),
-                                  ),
-
-                                  child: const Icon(
-                                    Icons.directions_run,
-                                    color: Colors.white,
-                                    size: 30,
-                                  ),
-                                ),
-
-                                const SizedBox(width: 14),
-
-                                const Expanded(
-
-                                  child: Column(
-
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment
-                                            .start,
-
-                                    children: [
-
-                                      Text(
-
-                                        "Tetap Semangat 💪",
-
-                                        style: TextStyle(
-                                          color:
-                                              Colors.white,
-                                          fontSize: 20,
-                                          fontWeight:
-                                              FontWeight
-                                                  .bold,
-                                        ),
-                                      ),
-
-                                      SizedBox(height: 4),
-
-                                      Text(
-
-                                        "Jaga kesehatan dengan rutin berolahraga",
-
-                                        style: TextStyle(
-                                          color:
-                                              Colors.white70,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            Row(
-
-                              children: [
-
-                                Expanded(
-
-                                  child: _buildStatCard(
-                                    Icons.flag,
-                                    "${stats['totalRun'] ?? 0}",
-                                    "Total Run",
-                                  ),
-                                ),
-
-                                const SizedBox(width: 14),
-
-                                Expanded(
-
-                                  child: _buildStatCard(
-                                    Icons.route,
-                                    "${stats['totalDistance'] ?? 0} km",
-                                    "Distance",
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      // 🔥 MOTIVATION
-                      Container(
-
-                        margin:
-                            const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
-
-                        padding:
-                            const EdgeInsets.all(18),
-
-                        decoration: BoxDecoration(
-
-                          color: isDark
-                              ? Colors.orange
-                                  .withOpacity(0.15)
-                              : Colors.orange.shade100,
-
-                          borderRadius:
-                              BorderRadius.circular(22),
-
-                          border: Border.all(
-
-                            color: isDark
-                                ? Colors.orange
-                                    .withOpacity(0.4)
-                                : Colors.orange.shade300,
-                          ),
-                        ),
-
-                        child: Row(
-
-                          children: [
-
-                            const Icon(
-                              Icons.favorite,
-                              color: Colors.orange,
-                              size: 34,
-                            ),
-
-                            const SizedBox(width: 14),
-
-                            Expanded(
-
-                              child: Column(
-
-                                crossAxisAlignment:
-                                    CrossAxisAlignment
-                                        .start,
-
-                                children: [
-
-                                  const Text(
-
-                                    "Hidup Sehat 🌿",
-
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight:
-                                          FontWeight.bold,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 4),
-
-                                  Text(
-
-                                    "Lari rutin membantu menjaga kesehatan tubuh dan pikiran.",
-
-                                    style: TextStyle(
-
-                                      color: isDark
-                                          ? Colors.white70
-                                          : Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 28),
-
-                      // 🔥 TITLE
-                      const Padding(
-
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                        ),
-
-                        child: Text(
-
-                          "Recent Activity",
-
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      // 🔥 EMPTY STATE
-                      if (data.isEmpty)
-
-                        Padding(
-
-                          padding:
-                              const EdgeInsets.only(
-                            top: 80,
+                          const SizedBox(
+                            width: 14,
                           ),
 
-                          child: Center(
+                          Expanded(
 
                             child: Column(
 
-                              children: const [
+                              crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start,
 
-                                Icon(
-                                  Icons.directions_run,
-                                  size: 80,
-                                  color: Colors.grey,
-                                ),
-
-                                SizedBox(height: 14),
+                              children: [
 
                                 Text(
 
-                                  "Belum ada data lari",
+                                  "Halo, ${Session.username ?? 'User'} 👋",
 
-                                  style: TextStyle(
-                                    fontSize: 20,
+                                  style:
+                                      const TextStyle(
+                                    fontSize: 24,
                                     fontWeight:
-                                        FontWeight.bold,
+                                        FontWeight
+                                            .bold,
                                   ),
                                 ),
 
-                                SizedBox(height: 6),
+                                const SizedBox(
+                                  height: 4,
+                                ),
 
-                                Text(
-                                  "Yuk mulai catat aktivitas larimu 🚀",
+                                const Text(
+
+                                  "Siap untuk lari hari ini?",
+
                                   style: TextStyle(
-                                    color: Colors.grey,
+                                    color:
+                                        Colors.grey,
+                                    fontSize: 15,
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+
+                    // 🔥 DASHBOARD
+                    Container(
+
+                      margin:
+                          const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+
+                      padding:
+                          const EdgeInsets.all(22),
+
+                      decoration: BoxDecoration(
+
+                        gradient:
+                            const LinearGradient(
+
+                          colors: [
+                            Color(0xFF2196F3),
+                            Color(0xFF4CAF50),
+                          ],
+
+                          begin: Alignment.topLeft,
+                          end:
+                              Alignment.bottomRight,
                         ),
 
-                      // 🔥 LIST ACTIVITY
-                      ListView.builder(
+                        borderRadius:
+                            BorderRadius.circular(
+                          28,
+                        ),
 
-                        itemCount:
-                            data.length > 3
-                                ? 3
-                                : data.length,
+                        boxShadow: [
 
-                        shrinkWrap: true,
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
 
-                        physics:
-                            const NeverScrollableScrollPhysics(),
+                      child: Column(
 
-                        itemBuilder: (context, index) {
+                        crossAxisAlignment:
+                            CrossAxisAlignment
+                                .start,
 
-                          final run = data[index];
+                        children: [
 
-                          return Card(
+                          Row(
 
-                            elevation: 3,
+                            children: [
 
-                            margin:
-                                const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-
-                            shape:
-                                RoundedRectangleBorder(
-
-                              borderRadius:
-                                  BorderRadius.circular(
-                                22,
-                              ),
-                            ),
-
-                            child: InkWell(
-
-                              borderRadius:
-                                  BorderRadius.circular(
-                                22,
-                              ),
-
-                              onTap: () async {
-
-  final result = await Navigator.push(
-
-    context,
-
-    MaterialPageRoute(
-
-      builder: (_) =>
-          DetailRunScreen(
-        run: run,
-      ),
-    ),
-  );
-
-  if (result == true) {
-
-    setState(() {});
-  }
-},
-
-                              child: Padding(
+                              Container(
 
                                 padding:
-                                    const EdgeInsets.all(
-                                  18,
+                                    const EdgeInsets
+                                        .all(14),
+
+                                decoration:
+                                    BoxDecoration(
+
+                                  color: Colors.white
+                                      .withOpacity(
+                                    0.2,
+                                  ),
+
+                                  borderRadius:
+                                      BorderRadius
+                                          .circular(
+                                    18,
+                                  ),
                                 ),
 
-                                child: Row(
+                                child: const Icon(
+                                  Icons
+                                      .directions_run,
+                                  color:
+                                      Colors.white,
+                                  size: 30,
+                                ),
+                              ),
+
+                              const SizedBox(
+                                width: 14,
+                              ),
+
+                              const Expanded(
+
+                                child: Column(
+
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment
+                                          .start,
 
                                   children: [
 
-                                    Container(
+                                    Text(
 
-                                      padding:
-                                          const EdgeInsets
-                                              .all(14),
+                                      "Tetap Semangat 💪",
 
-                                      decoration:
-                                          BoxDecoration(
-
-                                        color: Colors.blue
-                                            .withOpacity(
-                                          0.12,
-                                        ),
-
-                                        borderRadius:
-                                            BorderRadius
-                                                .circular(
-                                          18,
-                                        ),
-                                      ),
-
-                                      child: const Icon(
-                                        Icons
-                                            .directions_run,
-                                        color:
-                                            Colors.blue,
-                                        size: 28,
+                                      style:
+                                          TextStyle(
+                                        color: Colors
+                                            .white,
+                                        fontSize: 20,
+                                        fontWeight:
+                                            FontWeight
+                                                .bold,
                                       ),
                                     ),
 
-                                    const SizedBox(
-                                      width: 16,
+                                    SizedBox(
+                                      height: 4,
                                     ),
 
-                                    Expanded(
+                                    Text(
 
-                                      child: Column(
+                                      "Jaga kesehatan dengan rutin berolahraga",
 
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment
-                                                .start,
-
-                                        children: [
-
-                                          Text(
-
-                                            "${run['distance']} km",
-
-                                            style:
-                                                const TextStyle(
-                                              fontSize:
-                                                  18,
-                                              fontWeight:
-                                                  FontWeight
-                                                      .bold,
-                                            ),
-                                          ),
-
-                                          const SizedBox(
-                                            height: 4,
-                                          ),
-
-                                          Text(
-
-                                            run['date']
-                                                .toString()
-                                                .split(
-                                                    ' ')[0],
-
-                                            style:
-                                                const TextStyle(
-                                              color:
-                                                  Colors
-                                                      .grey,
-                                            ),
-                                          ),
-                                        ],
+                                      style:
+                                          TextStyle(
+                                        color: Colors
+                                            .white70,
                                       ),
-                                    ),
-
-                                    const Icon(
-                                      Icons
-                                          .arrow_forward_ios,
-                                      size: 18,
-                                      color: Colors.grey,
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            ],
+                          ),
+
+                          const SizedBox(
+                            height: 24,
+                          ),
+
+                          Row(
+
+                            children: [
+
+                              Expanded(
+
+                                child: _buildStatCard(
+                                  Icons.flag,
+                                  "${data.length}",
+                                  "Total Run",
+                                ),
+                              ),
+
+                              const SizedBox(
+                                width: 14,
+                              ),
+
+                              Expanded(
+
+                                child: _buildStatCard(
+                                  Icons.route,
+                                  "${totalDistance.toStringAsFixed(1)} km",
+                                  "Distance",
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // 🔥 MOTIVATION
+                    Container(
+
+                      margin:
+                          const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+
+                      padding:
+                          const EdgeInsets.all(18),
+
+                      decoration: BoxDecoration(
+
+                        color: isDark
+                            ? Colors.orange
+                                .withOpacity(0.15)
+                            : Colors.orange
+                                .shade100,
+
+                        borderRadius:
+                            BorderRadius.circular(
+                          22,
+                        ),
+
+                        border: Border.all(
+
+                          color: isDark
+                              ? Colors.orange
+                                  .withOpacity(0.4)
+                              : Colors.orange
+                                  .shade300,
+                        ),
+                      ),
+
+                      child: Row(
+
+                        children: [
+
+                          const Icon(
+                            Icons.favorite,
+                            color: Colors.orange,
+                            size: 34,
+                          ),
+
+                          const SizedBox(width: 14),
+
+                          Expanded(
+
+                            child: Column(
+
+                              crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start,
+
+                              children: [
+
+                                const Text(
+
+                                  "Hidup Sehat 🌿",
+
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight:
+                                        FontWeight
+                                            .bold,
+                                  ),
+                                ),
+
+                                const SizedBox(
+                                  height: 4,
+                                ),
+
+                                Text(
+
+                                  "Lari rutin membantu menjaga kesehatan tubuh dan pikiran.",
+
+                                  style: TextStyle(
+
+                                    color: isDark
+                                        ? Colors
+                                            .white70
+                                        : Colors
+                                            .black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // 🔥 TITLE
+                    const Padding(
+
+                      padding:
+                          EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
+
+                      child: Text(
+
+                        "Recent Activity",
+
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight:
+                              FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // 🔥 EMPTY STATE
+                    if (data.isEmpty)
+
+                      Padding(
+
+                        padding:
+                            const EdgeInsets.only(
+                          top: 80,
+                        ),
+
+                        child: Center(
+
+                          child: Column(
+
+                            children: const [
+
+                              Icon(
+                                Icons
+                                    .directions_run,
+                                size: 80,
+                                color: Colors.grey,
+                              ),
+
+                              SizedBox(height: 14),
+
+                              Text(
+
+                                "Belum ada data lari",
+
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight:
+                                      FontWeight
+                                          .bold,
+                                ),
+                              ),
+
+                              SizedBox(height: 6),
+
+                              Text(
+                                "Yuk mulai catat aktivitas larimu 🚀",
+                                style: TextStyle(
+                                  color:
+                                      Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    // 🔥 LIST ACTIVITY
+                    ListView.builder(
+
+                      itemCount:
+                          data.length > 3
+                              ? 3
+                              : data.length,
+
+                      shrinkWrap: true,
+
+                      physics:
+                          const NeverScrollableScrollPhysics(),
+
+                      itemBuilder:
+                          (context, index) {
+
+                        final run =
+                            data[index];
+
+                        return Card(
+
+                          elevation: 3,
+
+                          margin:
+                              const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+
+                          shape:
+                              RoundedRectangleBorder(
+
+                            borderRadius:
+                                BorderRadius.circular(
+                              22,
+                            ),
+                          ),
+
+                          child: InkWell(
+
+                            borderRadius:
+                                BorderRadius.circular(
+                              22,
+                            ),
+
+                            onTap: () async {
+
+                              final result =
+                                  await Navigator.push(
+
+                                context,
+
+                                MaterialPageRoute(
+
+                                  builder: (_) =>
+                                      DetailRunScreen(
+                                    run: run,
+                                  ),
+                                ),
+                              );
+
+                              if (result ==
+                                  true) {
+
+                                runVM.fetchRuns();
+                              }
+                            },
+
+                            child: Padding(
+
+                              padding:
+                                  const EdgeInsets.all(
+                                18,
+                              ),
+
+                              child: Row(
+
+                                children: [
+
+                                  Container(
+
+                                    padding:
+                                        const EdgeInsets
+                                            .all(14),
+
+                                    decoration:
+                                        BoxDecoration(
+
+                                      color: Colors
+                                          .blue
+                                          .withOpacity(
+                                        0.12,
+                                      ),
+
+                                      borderRadius:
+                                          BorderRadius
+                                              .circular(
+                                        18,
+                                      ),
+                                    ),
+
+                                    child:
+                                        const Icon(
+                                      Icons
+                                          .directions_run,
+                                      color:
+                                          Colors
+                                              .blue,
+                                      size: 28,
+                                    ),
+                                  ),
+
+                                  const SizedBox(
+                                    width: 16,
+                                  ),
+
+                                  Expanded(
+
+                                    child: Column(
+
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment
+                                              .start,
+
+                                      children: [
+
+                                        Text(
+
+                                          "${run['distance']} km",
+
+                                          style:
+                                              const TextStyle(
+                                            fontSize:
+                                                18,
+                                            fontWeight:
+                                                FontWeight
+                                                    .bold,
+                                          ),
+                                        ),
+
+                                        const SizedBox(
+                                          height: 4,
+                                        ),
+
+                                        Text(
+
+                                          run['date']
+                                              .toString()
+                                              .split(
+                                                  ' ')[0],
+
+                                          style:
+                                              const TextStyle(
+                                            color: Colors
+                                                .grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  const Icon(
+                                    Icons
+                                        .arrow_forward_ios,
+                                    size: 18,
+                                    color:
+                                        Colors.grey,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              );
-            },
-          );
-        },
-      ),
+              ),
+            ),
 
       floatingActionButton:
           FloatingActionButton(
@@ -672,7 +697,10 @@ class _HomeScreenState
               builder: (_) =>
                   AddRunScreen(),
             ),
-          ).then((_) => setState(() {}));
+          ).then((_) {
+
+            runVM.fetchRuns();
+          });
         },
 
         child: const Icon(Icons.add),
