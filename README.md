@@ -30,6 +30,8 @@ Aplikasi mobile Flutter untuk mencatat aktivitas lari harian dengan tampilan mod
 - SQLite (sqflite)
 - fl_chart
 - Material Design
+- Provider (State Management)
+- MVVM Architecture
 
 ---
 
@@ -37,50 +39,41 @@ Aplikasi mobile Flutter untuk mencatat aktivitas lari harian dengan tampilan mod
 
 ```bash
 lib/
-│   main.dart
 │
-├── data/
+├── main.dart
+├── data
 │   └── user_data.dart
 │
-├── database/
-│   ├── auth_service.dart
+├── database
 │   ├── db_helper.dart
 │   └── session.dart
 │
-├── models/
+├── models
 │   ├── run.dart
 │   └── user.dart
 │
-├── views/
-│   ├── auth/
-│   │   ├── login_screen.dart
-│   │   └── register_screen.dart
-│   │
-│   ├── home/
-│   │   └── home_screen.dart
-│   │
-│   ├── navigation/
-│   │   ├── bottom_nav_screen.dart
-│   │   └── main_navigation.dart
-│   │
-│   ├── profile/
-│   │   └── profile_screen.dart
-│   │
-│   ├── run/
-│   │   ├── add_run_screen.dart
-│   │   ├── detail_run_screen.dart
-│   │   └── edit_run_screen.dart
-│   │
-│   ├── splash/
-│   │   └── splash_screen.dart
-│   │
-│   ├── statistic/
-│   │   └── statistic_screen.dart
-│   │
-│   └── welcome/
-│       └── welcome_screen.dart
+├── services
+│   └── auth_service.dart
 │
-└── widgets/
+├── theme
+│   ├── app_theme.dart
+│   └── theme_provider.dart
+│
+├── viewmodels
+│   ├── auth_viewmodel.dart
+│   └── run_viewmodel.dart
+│
+├── views
+│   ├── auth
+│   ├── home
+│   ├── navigation
+│   ├── profile
+│   ├── run
+│   ├── splash
+│   ├── statistic
+│   └── welcome
+│
+└── widgets
 ```
 
 ---
@@ -216,6 +209,48 @@ https://drive.google.com/drive/folders/14SAwvry-7f893_SUOA6B8vObUMJE_r4y
 
 ---
 
+# 🧠 MVVM Architecture
+
+Aplikasi ini telah menerapkan arsitektur MVVM (Model View ViewModel) untuk memisahkan logic aplikasi dan tampilan UI agar kode lebih terstruktur, mudah dikembangkan, dan mudah dipelihara.
+
+## 📌 Struktur MVVM
+
+### Model
+Berisi representasi data aplikasi.
+- `run.dart`
+- `user.dart`
+
+### View
+Berisi tampilan UI aplikasi.
+- Login Screen
+- Home Screen
+- Statistic Screen
+- Add/Edit Run Screen
+- dll
+
+### ViewModel
+Berisi business logic dan penghubung antara View dan data/service.
+- `run_viewmodel.dart`
+- `auth_viewmodel.dart`
+
+### Service
+Berisi proses akses database dan autentikasi.
+- `auth_service.dart`
+
+---
+
+## 🔄 Alur MVVM
+
+View → ViewModel → Service → Database
+
+Contoh:
+- User login dari LoginScreen
+- LoginScreen memanggil AuthViewModel
+- AuthViewModel memanggil AuthService
+- AuthService mengakses SQLite Database
+
+---
+
 # 🏁 Hasil Akhir
 
 Aplikasi ini berhasil mengimplementasikan:
@@ -228,3 +263,8 @@ Aplikasi ini berhasil mengimplementasikan:
 - Navigation System
 - Dark Mode
 - Responsive Mobile Design
+- MVVM Architecture
+- Provider State Management
+- Source Code Refactoring
+
+---
