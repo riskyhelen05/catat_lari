@@ -100,16 +100,16 @@ Future<void> updateRun({
 }
 
   // DELETE RUN
-  Future<void> deleteRun(int id) async {
+Future<void> deleteRun(int id) async {
 
-    final db = await _dbHelper.database;
+  final db = await DBHelper().database;
 
-    await db.delete(
-      'runs',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+  await db.delete(
+    'runs',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
 
-    await fetchRuns();
-  }
+  await fetchRuns();
+}
 }
