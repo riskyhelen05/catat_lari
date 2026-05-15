@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../data/user_data.dart';
-
 import '../../database/db_helper.dart';
 
 import '../../database/session.dart';
@@ -10,6 +8,9 @@ import '../navigation/bottom_nav_screen.dart';
 
 
 class LoginScreen extends StatefulWidget {
+
+  const LoginScreen({super.key});
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
