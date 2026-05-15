@@ -51,14 +51,27 @@ class RunViewModel extends ChangeNotifier {
   }
 
   // ADD RUN
-  Future<void> addRun(
-    Map<String, dynamic> data,
-  ) async {
+Future<void> addRun({
+  required int userId,
+  required double distance,
+  required String duration,
+  required String note,
+  required String date,
+}) async {
 
-    await _dbHelper.insertRun(data);
+  final db = DBHelper();
 
-    await fetchRuns();
-  }
+  await db.insertRun({
+
+    'userId': userId,
+    'distance': distance,
+    'duration': duration,
+    'note': note,
+    'date': date,
+  });
+
+  await fetchRuns();
+}
 
   // UPDATE RUN
   Future<void> updateRun(
