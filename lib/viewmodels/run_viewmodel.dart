@@ -74,15 +74,30 @@ Future<void> addRun({
 }
 
   // UPDATE RUN
-  Future<void> updateRun(
-    int id,
-    Map<String, dynamic> data,
-  ) async {
+Future<void> updateRun({
+  required int id,
+  required double distance,
+  required String duration,
+  required String note,
+  required String date,
+}) async {
 
-    await _dbHelper.updateRun(id, data);
+  final db = DBHelper();
 
-    await fetchRuns();
-  }
+  await db.updateRun(
+
+    id,
+
+    {
+      'distance': distance,
+      'duration': duration,
+      'note': note,
+      'date': date,
+    },
+  );
+
+  await fetchRuns();
+}
 
   // DELETE RUN
   Future<void> deleteRun(int id) async {
