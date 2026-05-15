@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../database/db_helper.dart';
+import 'package:provider/provider.dart';
+
 import '../../database/session.dart';
+import '../../viewmodels/run_viewmodel.dart';
 
 class AddRunScreen extends StatefulWidget {
 
@@ -19,14 +21,16 @@ class _AddRunScreenState
   final distanceController =
       TextEditingController();
 
-  final durationController =
-      TextEditingController();
-
   final noteController =
       TextEditingController();
 
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate =
+      DateTime.now();
 
+  TimeOfDay selectedTime =
+      TimeOfDay.now();
+
+  // 🔥 DATE PICKER
   Future<void> pickDate(
       BuildContext context) async {
 
@@ -49,31 +53,67 @@ class _AddRunScreenState
     }
   }
 
+  // 🔥 TIME PICKER
+  Future<void> pickTime(
+      BuildContext context) async {
+
+    final picked = await showTimePicker(
+
+      context: context,
+
+      initialTime: selectedTime,
+    );
+
+    if (picked != null) {
+
+      setState(() {
+        selectedTime = picked;
+      });
+    }
+  }
+
+  // 🔥 FORMAT DURASI
+  String formatDuration(
+      TimeOfDay time) {
+
+    final h =
+        time.hour.toString().padLeft(2, '0');
+
+    final m =
+        time.minute.toString().padLeft(2, '0');
+
+    return "$h:$m menit";
+  }
+
+  // 🔥 SAVE RUN
   void saveRun() async {
 
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!
+        .validate()) {
       return;
     }
 
-    final db = DBHelper();
+    final runVM =
+        Provider.of<RunViewModel>(
+      context,
+      listen: false,
+    );
 
-    await db.insertRun({
+    await runVM.addRun(
 
-      'userId': Session.userId,
+      userId: Session.userId!,
 
-      'distance': double.parse(
+      distance: double.parse(
         distanceController.text,
       ),
 
-      // 🔥 SIMPAN MENIT SAJA
-      'duration': int.parse(
-        durationController.text,
-      ),
+      duration:
+          formatDuration(selectedTime),
 
-      'note': noteController.text,
+      note: noteController.text,
 
-      'date': selectedDate.toString(),
-    });
+      date: selectedDate.toString(),
+    );
 
     Navigator.pop(context);
   }
@@ -85,6 +125,7 @@ class _AddRunScreenState
 
       appBar: AppBar(
         title: const Text("Tambah Lari"),
+        centerTitle: true,
       ),
 
       body: SingleChildScrollView(
@@ -99,37 +140,11 @@ class _AddRunScreenState
 
             children: [
 
+              // 🔥 DISTANCE
               TextFormField(
 
-                controller: distanceController,
-
-                keyboardType:
-                    TextInputType.number,
-
-                decoration: InputDecoration(
-
-                  labelText: "Jarak (km)",
-
-                  prefixIcon:
-                      const Icon(Icons.route),
-
-                  border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(16),
-                  ),
-                ),
-
-                validator: (v) =>
-                    v == null || v.isEmpty
-                        ? "Wajib diisi"
-                        : null,
-              ),
-
-              const SizedBox(height: 18),
-
-              TextFormField(
-
-                controller: durationController,
+                controller:
+                    distanceController,
 
                 keyboardType:
                     TextInputType.number,
@@ -137,17 +152,20 @@ class _AddRunScreenState
                 decoration: InputDecoration(
 
                   labelText:
-                      "Durasi (menit)",
-
-                  hintText:
-                      "Contoh: 45",
+                      "Jarak (km)",
 
                   prefixIcon:
-                      const Icon(Icons.timer),
+                      const Icon(
+                    Icons.route,
+                  ),
 
-                  border: OutlineInputBorder(
+                  border:
+                      OutlineInputBorder(
+
                     borderRadius:
-                        BorderRadius.circular(16),
+                        BorderRadius.circular(
+                      16,
+                    ),
                   ),
                 ),
 
@@ -159,9 +177,11 @@ class _AddRunScreenState
 
               const SizedBox(height: 18),
 
+              // 🔥 DURASI
               Container(
 
-                padding: const EdgeInsets.symmetric(
+                padding:
+                    const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 18,
                 ),
@@ -169,11 +189,71 @@ class _AddRunScreenState
                 decoration: BoxDecoration(
 
                   border: Border.all(
-                    color: Colors.grey.shade400,
+                    color:
+                        Colors.grey.shade400,
                   ),
 
                   borderRadius:
-                      BorderRadius.circular(16),
+                      BorderRadius.circular(
+                    16,
+                  ),
+                ),
+
+                child: Row(
+
+                  mainAxisAlignment:
+                      MainAxisAlignment
+                          .spaceBetween,
+
+                  children: [
+
+                    Text(
+
+                      "⏱ ${formatDuration(selectedTime)}",
+
+                      style:
+                          const TextStyle(
+                        fontSize: 16,
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
+                    ),
+
+                    ElevatedButton(
+
+                      onPressed: () =>
+                          pickTime(context),
+
+                      child: const Text(
+                        "Pilih",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              // 🔥 DATE
+              Container(
+
+                padding:
+                    const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 18,
+                ),
+
+                decoration: BoxDecoration(
+
+                  border: Border.all(
+                    color:
+                        Colors.grey.shade400,
+                  ),
+
+                  borderRadius:
+                      BorderRadius.circular(
+                    16,
+                  ),
                 ),
 
                 child: Row(
@@ -188,8 +268,11 @@ class _AddRunScreenState
 
                       "📅 ${selectedDate.toLocal().toString().split(' ')[0]}",
 
-                      style: const TextStyle(
+                      style:
+                          const TextStyle(
                         fontSize: 16,
+                        fontWeight:
+                            FontWeight.bold,
                       ),
                     ),
 
@@ -208,37 +291,50 @@ class _AddRunScreenState
 
               const SizedBox(height: 18),
 
+              // 🔥 NOTE
               TextFormField(
 
-                controller: noteController,
+                controller:
+                    noteController,
 
                 maxLines: 3,
 
                 decoration: InputDecoration(
 
-                  labelText: "Catatan",
+                  labelText:
+                      "Catatan",
 
                   prefixIcon:
-                      const Icon(Icons.notes),
+                      const Icon(
+                    Icons.notes,
+                  ),
 
-                  border: OutlineInputBorder(
+                  border:
+                      OutlineInputBorder(
+
                     borderRadius:
-                        BorderRadius.circular(16),
+                        BorderRadius.circular(
+                      16,
+                    ),
                   ),
                 ),
               ),
 
               const SizedBox(height: 30),
 
+              // 🔥 BUTTON
               SizedBox(
 
                 width: double.infinity,
 
-                child: ElevatedButton.icon(
+                child:
+                    ElevatedButton.icon(
 
                   onPressed: saveRun,
 
-                  icon: const Icon(Icons.save),
+                  icon: const Icon(
+                    Icons.save,
+                  ),
 
                   label: const Text(
                     "Simpan Aktivitas",
