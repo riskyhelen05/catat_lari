@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../database/db_helper.dart';
+import '../../viewmodels/run_viewmodel.dart';
 import 'edit_run_screen.dart';
 
 class DetailRunScreen extends StatelessWidget {
@@ -192,7 +193,9 @@ class DetailRunScreen extends StatelessWidget {
               icon: Icons.timer,
               color: Colors.orange,
               title: "Durasi",
-              value: formatDuration(run['duration']),
+              value: formatDuration(
+                run['duration'],
+              ),
             ),
 
             buildInfoCard(
@@ -212,6 +215,7 @@ class DetailRunScreen extends StatelessWidget {
 
               children: [
 
+                // EDIT
                 Expanded(
 
                   child: ElevatedButton.icon(
@@ -234,21 +238,24 @@ class DetailRunScreen extends StatelessWidget {
 
                     onPressed: () async {
 
-  await Navigator.push(
+                      await Navigator.push(
 
-    context,
+                        context,
 
-    MaterialPageRoute(
+                        MaterialPageRoute(
 
-      builder: (_) =>
-          EditRunScreen(
-        run: run,
-      ),
-    ),
-  );
+                          builder: (_) =>
+                              EditRunScreen(
+                            run: run,
+                          ),
+                        ),
+                      );
 
-  Navigator.pop(context, true);
-},
+                      Navigator.pop(
+                        context,
+                        true,
+                      );
+                    },
 
                     icon: const Icon(Icons.edit),
 
@@ -258,6 +265,7 @@ class DetailRunScreen extends StatelessWidget {
 
                 const SizedBox(width: 14),
 
+                // DELETE
                 Expanded(
 
                   child: ElevatedButton.icon(
@@ -302,9 +310,11 @@ class DetailRunScreen extends StatelessWidget {
                             TextButton(
 
                               onPressed: () {
+
                                 Navigator.pop(
-                                    context,
-                                    false);
+                                  context,
+                                  false,
+                                );
                               },
 
                               child:
@@ -314,9 +324,11 @@ class DetailRunScreen extends StatelessWidget {
                             TextButton(
 
                               onPressed: () {
+
                                 Navigator.pop(
-                                    context,
-                                    true);
+                                  context,
+                                  true,
+                                );
                               },
 
                               child: const Text(
@@ -334,22 +346,21 @@ class DetailRunScreen extends StatelessWidget {
 
                       if (confirm == true) {
 
-                        final db =
-                            await DBHelper()
-                                .database;
-
-                        await db.delete(
-
-                          'runs',
-
-                          where: 'id = ?',
-
-                          whereArgs: [
-                            run['id']
-                          ],
+                        final runVM =
+                            Provider.of<
+                                RunViewModel>(
+                          context,
+                          listen: false,
                         );
 
-                        Navigator.pop(context);
+                        await runVM.deleteRun(
+                          run['id'],
+                        );
+
+                        Navigator.pop(
+                          context,
+                          true,
+                        );
 
                         ScaffoldMessenger.of(
                                 context)
