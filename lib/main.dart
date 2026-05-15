@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_provider.dart';
 
+import 'viewmodels/run_viewmodel.dart';
+
 import 'views/splash/splash_screen.dart';
 import 'views/navigation/bottom_nav_screen.dart';
 import 'views/auth/login_screen.dart';
@@ -13,9 +15,18 @@ void main() {
 
   runApp(
 
-    ChangeNotifierProvider(
+    MultiProvider(
 
-      create: (_) => ThemeProvider(),
+      providers: [
+
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => RunViewModel(),
+        ),
+      ],
 
       child: const MyApp(),
     ),
@@ -46,11 +57,14 @@ class MyApp extends StatelessWidget {
 
       routes: {
 
-        '/': (context) => SplashScreen(),
+        '/': (context) =>
+            const SplashScreen(),
 
-        '/login': (context) => LoginScreen(),
+        '/login': (context) =>
+            LoginScreen(),
 
-        '/register': (context) => RegisterScreen(),
+        '/register': (context) =>
+            RegisterScreen(),
 
         '/home': (context) =>
             const BottomNavScreen(),
