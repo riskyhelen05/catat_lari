@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-
-import '../../database/db_helper.dart';
-
 import '../../database/session.dart';
-
 import '../navigation/bottom_nav_screen.dart';
+import 'package:provider/provider.dart';
+import '../../viewmodels/auth_viewmodel.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -22,15 +20,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool isHidden = true;
 
-  void doLogin() async {
+void doLogin() async {
 
-  String emailText = emailController.text.trim();
-  String passwordText = passwordController.text.trim();
+  String emailText =
+      emailController.text.trim();
+
+  String passwordText =
+      passwordController.text.trim();
 
   if (emailText.isEmpty) {
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+
+      const SnackBar(
         content: Text("Email wajib diisi"),
       ),
     );
@@ -40,8 +43,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   if (passwordText.isEmpty) {
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+
+      const SnackBar(
         content: Text("Password wajib diisi"),
       ),
     );
@@ -49,49 +54,54 @@ class _LoginScreenState extends State<LoginScreen> {
     return;
   }
 
-  final db = await DBHelper().database;
-
-  final result = await db.query(
-    'users',
-
-    where: 'email = ? AND password = ?',
-
-    whereArgs: [
-      emailText,
-      passwordText,
-    ],
+  final authVM =
+      Provider.of<AuthViewModel>(
+    context,
+    listen: false,
   );
 
-  if (result.isEmpty) {
+  final user = await authVM.login(
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Email atau password salah"),
+    username: emailText,
+
+    password: passwordText,
+  );
+
+  if (user == null) {
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+
+      const SnackBar(
+        content: Text(
+          "Email atau password salah",
+        ),
       ),
     );
 
     return;
   }
 
-  final user = result.first;
+  // SIMPAN SESSION
+  Session.setUser(user);
 
-// simpan ke session
-Session.setUser(user);
+  ScaffoldMessenger.of(context)
+      .showSnackBar(
 
-print("User login: ${Session.userId}");
+    const SnackBar(
+      content: Text("Login berhasil"),
+    ),
+  );
 
-ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(
-    content: Text("Login berhasil"),
-  ),
-);
+  Navigator.pushReplacement(
 
-Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (context) => const BottomNavScreen(),
-  ),
-);
+    context,
+
+    MaterialPageRoute(
+      builder: (_) =>
+          const BottomNavScreen(),
+    ),
+  );
 }
 
   @override

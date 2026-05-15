@@ -10,6 +10,7 @@ import 'views/splash/splash_screen.dart';
 import 'views/navigation/bottom_nav_screen.dart';
 import 'views/auth/login_screen.dart';
 import 'views/auth/register_screen.dart';
+import 'viewmodels/auth_viewmodel.dart';
 
 void main() {
 
@@ -25,6 +26,10 @@ void main() {
 
         ChangeNotifierProvider(
           create: (_) => RunViewModel(),
+        ),
+
+        ChangeNotifierProvider(
+        create: (_) => AuthViewModel(),
         ),
       ],
 
