@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_provider.dart';
 
-import 'screens/splash/splash_screen.dart';
-import 'screens/navigation/bottom_nav_screen.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/auth/register_screen.dart';
+import 'views/splash/splash_screen.dart';
+import 'views/navigation/bottom_nav_screen.dart';
+import 'views/auth/login_screen.dart';
+import 'views/auth/register_screen.dart';
 
 void main() {
 

@@ -51,7 +51,7 @@ lib/
 │   ├── run.dart
 │   └── user.dart
 │
-├── screens/
+├── views/
 │   ├── auth/
 │   │   ├── login_screen.dart
 │   │   └── register_screen.dart
