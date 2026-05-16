@@ -1,5 +1,3 @@
-import 'package:sqflite/sqflite.dart';
-
 import '../database/db_helper.dart';
 
 class AuthService {
