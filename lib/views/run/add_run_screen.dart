@@ -21,14 +21,14 @@ class _AddRunScreenState
   final distanceController =
       TextEditingController();
 
+  final durationController =
+    TextEditingController();
+
   final noteController =
-      TextEditingController();
+    TextEditingController();
 
   DateTime selectedDate =
       DateTime.now();
-
-  TimeOfDay selectedTime =
-      TimeOfDay.now();
 
   // 🔥 DATE PICKER
   Future<void> pickDate(
@@ -53,38 +53,6 @@ class _AddRunScreenState
     }
   }
 
-  // 🔥 TIME PICKER
-  Future<void> pickTime(
-      BuildContext context) async {
-
-    final picked = await showTimePicker(
-
-      context: context,
-
-      initialTime: selectedTime,
-    );
-
-    if (picked != null) {
-
-      setState(() {
-        selectedTime = picked;
-      });
-    }
-  }
-
-  // 🔥 FORMAT DURASI
-  String formatDuration(
-      TimeOfDay time) {
-
-    final h =
-        time.hour.toString().padLeft(2, '0');
-
-    final m =
-        time.minute.toString().padLeft(2, '0');
-
-    return "$h:$m menit";
-  }
-
   // 🔥 SAVE RUN
   void saveRun() async {
 
@@ -107,8 +75,7 @@ class _AddRunScreenState
         distanceController.text,
       ),
 
-      duration:
-          formatDuration(selectedTime),
+      duration: durationController.text,
 
       note: noteController.text,
 
@@ -175,64 +142,35 @@ class _AddRunScreenState
                         : null,
               ),
 
-              const SizedBox(height: 18),
-
               // 🔥 DURASI
-              Container(
+              TextFormField(
 
-                padding:
-                    const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 18,
-                ),
+                controller: durationController,
 
-                decoration: BoxDecoration(
+                decoration: InputDecoration(
 
-                  border: Border.all(
-                    color:
-                        Colors.grey.shade400,
+                  labelText: "Durasi",
+
+                  hintText: "Contoh: 45 menit",
+
+                  prefixIcon: const Icon(
+                    Icons.timer,
                   ),
+
+                border: OutlineInputBorder(
 
                   borderRadius:
-                      BorderRadius.circular(
-                    16,
+                    BorderRadius.circular(16),
+                ),
+                ),
+
+                validator: (v) =>
+                  v == null || v.isEmpty
+                    ? "Wajib diisi"
+                    : null,
                   ),
-                ),
 
-                child: Row(
-
-                  mainAxisAlignment:
-                      MainAxisAlignment
-                          .spaceBetween,
-
-                  children: [
-
-                    Text(
-
-                      "⏱ ${formatDuration(selectedTime)}",
-
-                      style:
-                          const TextStyle(
-                        fontSize: 16,
-                        fontWeight:
-                            FontWeight.bold,
-                      ),
-                    ),
-
-                    ElevatedButton(
-
-                      onPressed: () =>
-                          pickTime(context),
-
-                      child: const Text(
-                        "Pilih",
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 18),
+                const SizedBox(height: 18),
 
               // 🔥 DATE
               Container(
