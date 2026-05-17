@@ -108,69 +108,65 @@ class _AddRunScreenState
             children: [
 
               // 🔥 DISTANCE
-              TextFormField(
+TextFormField(
 
-                controller:
-                    distanceController,
+  controller: distanceController,
 
-                keyboardType:
-                    TextInputType.number,
+  keyboardType: TextInputType.number,
 
-                decoration: InputDecoration(
+  decoration: InputDecoration(
 
-                  labelText:
-                      "Jarak (km)",
+    labelText: "Jarak (km)",
 
-                  prefixIcon:
-                      const Icon(
-                    Icons.route,
-                  ),
+    prefixIcon: const Icon(
+      Icons.route,
+    ),
 
-                  border:
-                      OutlineInputBorder(
+    border: OutlineInputBorder(
 
-                    borderRadius:
-                        BorderRadius.circular(
-                      16,
-                    ),
-                  ),
-                ),
+      borderRadius:
+          BorderRadius.circular(16),
+    ),
+  ),
 
-                validator: (v) =>
-                    v == null || v.isEmpty
-                        ? "Wajib diisi"
-                        : null,
-              ),
+  validator: (v) =>
+      v == null || v.isEmpty
+          ? "Wajib diisi"
+          : null,
+),
 
-              // 🔥 DURASI
-              TextFormField(
+const SizedBox(height: 20),
 
-                controller: durationController,
+// 🔥 DURASI
+TextFormField(
 
-                decoration: InputDecoration(
+  controller: durationController,
 
-                  labelText: "Durasi",
+  decoration: InputDecoration(
 
-                  hintText: "Contoh: 45 menit",
+    labelText: "Durasi (menit)",
 
-                  prefixIcon: const Icon(
-                    Icons.timer,
-                  ),
+    hintText: "Contoh: 45 menit",
 
-                border: OutlineInputBorder(
+    prefixIcon: const Icon(
+      Icons.timer,
+    ),
 
-                  borderRadius:
-                    BorderRadius.circular(16),
-                ),
-                ),
+    border: OutlineInputBorder(
 
-                validator: (v) =>
-                  v == null || v.isEmpty
-                    ? "Wajib diisi"
-                    : null,
-                  ),
+      borderRadius:
+          BorderRadius.circular(16),
+    ),
+  ),
 
-                const SizedBox(height: 18),
+  validator: (v) =>
+      v == null || v.isEmpty
+          ? "Wajib diisi"
+          : null,
+),
+
+const SizedBox(
+                  height: 20),
 
               // 🔥 DATE
               Container(
@@ -227,7 +223,7 @@ class _AddRunScreenState
                 ),
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
 
               // 🔥 NOTE
               TextFormField(
